@@ -1,0 +1,10 @@
+aiogram>=2.11.2,<3.0
+environs~=8.0.0
+Django~=3.1.7
+Pillow
+asgiref~=3.3.1
+psycopg2-binary
+aioschedule
+emoji
+gunicorn
+requests

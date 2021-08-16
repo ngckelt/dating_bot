@@ -9,19 +9,36 @@ class TimeBasedModel(models.Model):
         abstract = True
 
 
-class UserQuestions(TimeBasedModel):
+class Questions(TimeBasedModel):
     question = models.CharField(verbose_name="Вопрос", max_length=255)
     answer_options = models.TextField(verbose_name="Варианты ответа. Каждая строка - новый вариант ответа "
-                                                   "(точно так же будет вышлядеть инлайн меню). "
+                                                   "(точно так же будет выглядеть инлайн меню). "
                                                    "Слово НЕ должно быть больше 32 символов. "
-                                                   "Для заполнения не обязательно", blank=True)
+                                                   "Для заполнения НЕ обязательно", blank=True)
+
+    class Meta:
+        abstract = True
+
+
+class UserQuestions(Questions):
 
     def __str__(self):
         return self.question
 
     class Meta:
-        verbose_name = "Вопросы для опросника о пользователе"
+        ordering = ['created_at']
+        verbose_name = "Вопрос для опросника о пользователе"
+        verbose_name_plural = "Вопросы для опросника о пользователе"
 
 
+class SearchQuestions(Questions):
+
+    def __str__(self):
+        return self.question
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = "Вопрос для опросника для поиска"
+        verbose_name_plural = "Вопросы для опросника для поиска"
 
 

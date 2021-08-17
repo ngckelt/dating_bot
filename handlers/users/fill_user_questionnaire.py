@@ -121,6 +121,7 @@ async def get_nationality_by_message(message: types.Message, state: FSMContext):
     await FillUserQuestionnaire.get_education.set()
 
 
+# Образование (кнопка)
 @dp.callback_query_handler(education_callback.filter(), state=FillUserQuestionnaire.get_education)
 async def get_education(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -144,6 +145,7 @@ async def get_education(callback: types.CallbackQuery, callback_data: dict, stat
     await FillUserQuestionnaire.get_education_city.set()
 
 
+# Город, где получал образование (кнопка)
 @dp.callback_query_handler(education_city_callback.filter(), state=FillUserQuestionnaire.get_education_city)
 async def get_education_city(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -152,10 +154,32 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
     questions = state_data.get('questions')
     current_question = state_data.get('current_question')
     education_cities = questions[current_question-1].answer_options.split('\n')
+    if int(education_city_index) == len(education_cities) - 1:
+        await callback.message.answer(text="Укажите город, в котором вы получали образование")
+    else:
+        current_question += 1
+        education_city = education_cities[int(education_city_index)]
+        await state.update_data(education_city=education_city, current_question=current_question)
+        await callback.message.answer(
+            # Спрашиваем город текущкго проживания
+            text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
+            reply_markup=universal_markup(
+                prepare_answers(questions[current_question - 1].answer_options),
+                'city_callback'
+            )
+        )
+        await FillUserQuestionnaire.get_city.set()
+
+
+@dp.message_handler(state=FillUserQuestionnaire.get_education_city)
+async def get_education_city_message(message: types.Message, state: FSMContext):
+    education_city = message.text
+    state_data = await state.get_data()
+    questions = state_data.get('questions')
+    current_question = state_data.get('current_question')
     current_question += 1
-    education_city = education_cities[int(education_city_index)]
     await state.update_data(education_city=education_city, current_question=current_question)
-    await callback.message.answer(
+    await message.answer(
         # Спрашиваем город текущкго проживания
         text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
         reply_markup=universal_markup(
@@ -166,6 +190,7 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
     await FillUserQuestionnaire.get_city.set()
 
 
+# Город проживания
 @dp.callback_query_handler(city_callback.filter(), state=FillUserQuestionnaire.get_city)
 async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -174,17 +199,36 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
     questions = state_data.get('questions')
     current_question = state_data.get('current_question')
     cities = questions[current_question - 1].answer_options.split('\n')
+    if int(city_index) == len(cities) - 1:
+        await callback.message.answer(text="Укажите город, в котором вы сейчас проживаете")
+    else:
+        current_question += 1
+        city = cities[int(city_index)]
+        await state.update_data(city=city, current_question=current_question)
+        await callback.message.answer(
+            # Спрашиваем есть ли автомобиль
+            text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
+            reply_markup=yes_or_no_markup('has_car')
+        )
+        await FillUserQuestionnaire.has_car.set()
+        
+        
+@dp.message_handler(state=FillUserQuestionnaire.get_city)
+async def get_city_message(message: types.Message, state: FSMContext):
+    city = message.text
+    state_data = await state.get_data()
+    questions = state_data.get('questions')
+    current_question = state_data.get('current_question')
     current_question += 1
-    city = cities[int(city_index)]
     await state.update_data(city=city, current_question=current_question)
-    await callback.message.answer(
+    await message.answer(
         # Спрашиваем есть ли автомобиль
         text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
         reply_markup=yes_or_no_markup('has_car')
     )
     await FillUserQuestionnaire.has_car.set()
 
-
+# Есть ли машина (кнопка)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='has_car'), state=FillUserQuestionnaire.has_car)
 async def has_car(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -202,6 +246,7 @@ async def has_car(callback: types.CallbackQuery, callback_data: dict, state: FSM
     await FillUserQuestionnaire.has_own_housing.set()
 
 
+# Есть ли жилье (кнопка)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='has_own_housing'),
                            state=FillUserQuestionnaire.has_own_housing)
 async def has_own_housing(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
@@ -223,6 +268,7 @@ async def has_own_housing(callback: types.CallbackQuery, callback_data: dict, st
     await FillUserQuestionnaire.get_profession.set()
 
 
+# Профессия (кнопка)
 @dp.callback_query_handler(profession_callback.filter(), state=FillUserQuestionnaire.get_profession)
 async def get_profession(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -245,6 +291,7 @@ async def get_profession(callback: types.CallbackQuery, callback_data: dict, sta
     await FillUserQuestionnaire.get_marital_status.set()
 
 
+# Семейное положение (кнопка)
 @dp.callback_query_handler(marital_status_callback.filter(), state=FillUserQuestionnaire.get_marital_status)
 async def get_marital_status(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -264,6 +311,7 @@ async def get_marital_status(callback: types.CallbackQuery, callback_data: dict,
     await FillUserQuestionnaire.has_children.set()
 
 
+# Есть ли дети (кнопка)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='has_children'),
                            state=FillUserQuestionnaire.has_children)
 async def has_children(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):

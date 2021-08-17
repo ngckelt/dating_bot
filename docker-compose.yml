@@ -1,0 +1,57 @@
+version: '3.1'
+
+services:
+
+  django:
+    container_name: djangoproject
+    build:
+      context: .
+    command: gunicorn admin.admin.wsgi:application -b 0.0.0.0:8000 --reload
+    ports:
+      - 8000:8000
+    networks:
+      - botnet
+    restart: always
+    volumes:
+      - .:/src
+    env_file:
+      - ".env"
+
+  tgbot:
+    container_name: bot
+    build:
+      context: .
+    volumes:
+      - .:/src
+    networks:
+      - botnet
+    restart: always
+    command: python app.py
+    env_file:
+      - ".env"
+    depends_on:
+      - django
+
+  nginx:
+    build:
+      context: ./nginx/
+      dockerfile: Dockerfile
+    networks:
+      - botnet
+    depends_on:
+      - django
+    ports:
+      - "80:80"
+    volumes:
+      - ./static/:/static
+    restart: always
+
+networks:
+  botnet:
+    driver: bridge
+
+volumes:
+  pgdata:
+
+# sudo systemctl enable docker.service
+# /etc/init.d/apache2 stop

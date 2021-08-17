@@ -42,3 +42,25 @@ class SearchQuestions(Questions):
         verbose_name_plural = "Вопросы для опросника для поиска"
 
 
+class Users(TimeBasedModel):
+    telegram_id = models.CharField(verbose_name="ID в телеграмме", max_length=20)
+    name = models.CharField(verbose_name="Имя", max_length=255)
+    age = models.CharField(verbose_name="Возраст", max_length=2)
+    nationality = models.CharField(verbose_name="Национальность", max_length=255)
+    education = models.CharField(verbose_name="Образование", max_length=255)
+    education_city = models.CharField(verbose_name="Город, где получал образование", max_length=255)
+    city = models.CharField(verbose_name="Город текущего проживания", max_length=255)
+    profession = models.CharField(verbose_name="Профессия", max_length=255)
+    marital_status = models.CharField(verbose_name="Семейное положение", max_length=255)
+    has_car = models.CharField(verbose_name="Есть ли автомобиль", max_length=255)
+    has_own_housing = models.CharField(verbose_name="Есть ли собственное жилье", max_length=255)
+    has_children = models.CharField(verbose_name="Есть ли дети", max_length=255)
+
+    def __str__(self):
+        return self.telegram_id
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+
+

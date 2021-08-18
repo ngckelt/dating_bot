@@ -28,7 +28,7 @@ async def bot_start(message: types.Message):
 
 
 @dp.callback_query_handler(change_user_data_callback.filter(), state=ChangeSearchQuestionnaire.chose_item)
-async def get_change_item(callback: types.CallbackQuery, callback_data: dict):
+async def get_change_item(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     item = callback_data.get('item')
     if item == 'age_range':
@@ -37,30 +37,38 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict):
     elif item == 'nationality':
         await callback.message.answer(text="Выберите национальность из списка")
         await ChangeSearchQuestionnaire.change_nationality.set()
+        await state.finish()
     elif item == 'education':
         await callback.message.answer(text="Выбарите уровень образования")
         await ChangeSearchQuestionnaire.change_education.set()
+        await state.finish()
     elif item == 'education_city':
         await callback.message.answer(text="Укажите еород, где получали образование")
         await ChangeSearchQuestionnaire.change_education_city.set()
+        await state.finish()
     elif item == 'city':
         await callback.message.answer(text="Укажите город текущего проживания")
         await ChangeSearchQuestionnaire.change_city.set()
+        await state.finish()
     elif item == 'profession':
         await callback.message.answer(text="Укажите новый вид деятельности")
         await ChangeSearchQuestionnaire.change_profession.set()
+        await state.finish()
     elif item == 'marital_status':
         await callback.message.answer(text="Выберите семейное положение")
         await ChangeSearchQuestionnaire.change_marital_status.set()
+        await state.finish()
     elif item == 'has_car':
         await callback.message.answer(text="Должен ли быть автомобиль")
         await ChangeSearchQuestionnaire.change_has_car.set()
+        await state.finish()
     elif item == 'has_own_housing':
         await callback.message.answer(text="Должно ли быть собственное жилье")
         await ChangeSearchQuestionnaire.change_has_own_housing.set()
     elif item == 'has_children':
         await callback.message.answer(text="Могут ли быть дети")
         await ChangeSearchQuestionnaire.change_has_children.set()
+        await state.finish()
 
 
 async def ask_to_continue_changing(message):

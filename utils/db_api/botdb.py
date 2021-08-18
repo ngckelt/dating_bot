@@ -15,3 +15,8 @@ def get_user(user_telegram_id):
 
 def get_user_questions():
     return UserQuestions.objects.all()
+
+
+def get_search_questions():
+    return SearchQuestions.objects.all()
+

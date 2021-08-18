@@ -2,6 +2,8 @@ from pprint import pprint
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+
+from keyboards.default.questionnaire_markups import fill_search_questionnaire
 from loader import dp
 from states.fill_user_questionnaire import FillUserQuestionnaire
 from utils.db_api import botdb as db
@@ -17,7 +19,8 @@ def prepare_answers(answers):
 def translate_choice(choice):
     return {
         "yes": "Да",
-        "no": "Нет"
+        "no": "Нет",
+        "does_not_matter": "Не имеет значения"
     }.get(choice)
 
 
@@ -349,7 +352,8 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
     )
 
     await callback.message.answer(
-        text="Дальше будет заполнение анкеты для поиска"
+        text="Теперь Вам необходимо заполнить анкету для поиска",
+        reply_markup=fill_search_questionnaire()
     )
     await state.finish()
 

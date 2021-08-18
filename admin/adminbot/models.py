@@ -32,6 +32,8 @@ class Users(TimeBasedModel):
 
 
 class Questions(TimeBasedModel):
+    question_id = models.CharField(verbose_name="ID вопроса",
+                                   max_length=20, editable=False)
     question = models.CharField(verbose_name="Вопрос", max_length=255)
     answer_options = models.TextField(verbose_name="Варианты ответа. Каждая строка - новый вариант ответа "
                                                    "(точно так же будет выглядеть инлайн меню). "

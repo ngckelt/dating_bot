@@ -65,6 +65,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
     elif item == 'has_own_housing':
         await callback.message.answer(text="Должно ли быть собственное жилье")
         await ChangeSearchQuestionnaire.change_has_own_housing.set()
+        await state.finish()
     elif item == 'has_children':
         await callback.message.answer(text="Могут ли быть дети")
         await ChangeSearchQuestionnaire.change_has_children.set()

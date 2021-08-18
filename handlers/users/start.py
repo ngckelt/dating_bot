@@ -10,6 +10,7 @@ from keyboards.default.questionnaire_markups import fill_user_questionnaire
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
+    print(message.from_user.values)
     user = db.get_user(message.from_user.id)
     if user is None:
         await message.answer(
@@ -18,20 +19,12 @@ async def bot_start(message: types.Message):
                  f"анкету с данными о себе. Чтобы сделать это, воспользуйтесь кнопкой ниже 👇",
             reply_markup=fill_user_questionnaire()
         )
-
+        if not message.from_user.username:
+            await message.answer("Внимание\nУ вас не установлен username. Он необходим, чтобы ...")
     else:
         await message.answer(
             text="Вы уже использовали данную команду",
             reply_markup=main_markup()
         )
 
-"""
-Заполнить анкету о себе
-Заполнить анкету для поиска
 
-Изменить анкету о себе
-Изменить анкету для поиска
-
-Мои данные
-Мои данные для поиска
-"""

@@ -1,5 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
+
+from keyboards.default.main_markup import main_markup
 from loader import dp
 
 from utils.db_api import botdb as db
@@ -18,7 +20,10 @@ async def bot_start(message: types.Message):
         )
 
     else:
-        await message.answer("Вы уже использовали данную команду")
+        await message.answer(
+            text="Вы уже использовали данную команду",
+            reply_markup=main_markup()
+        )
 
 """
 Заполнить анкету о себе

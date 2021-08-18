@@ -14,6 +14,14 @@ class UsersAdmin(admin.ModelAdmin):
     pass
 
 
+class QuestionnairesAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(models.UserQuestions, UserQuestionsAdmin)
 admin.site.register(models.SearchQuestions, SearchQuestionsAdmin)
 admin.site.register(models.Users, UsersAdmin)
+admin.site.register(models.Questionnaires, QuestionnairesAdmin)
+
+
+

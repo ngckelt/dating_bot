@@ -27,4 +27,3 @@ def fill_search_questionnaire():
 
     return markup
 
-

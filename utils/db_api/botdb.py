@@ -21,8 +21,13 @@ def get_search_questions():
     return SearchQuestions.objects.all()
 
 
-def create_questionnaire(user, **kwargs):
-    Questionnaires.objects.create()
+def create_questionnaire(**kwargs):
+    Questionnaires.objects.create(**kwargs)
 
 
+def get_questionnaire_by_user(user):
+    return Questionnaires.objects.filter(user=user).first()
 
+
+def update_search_questionnaire(user, **kwargs):
+    Questionnaires.objects.filter(user=user).update(**kwargs)

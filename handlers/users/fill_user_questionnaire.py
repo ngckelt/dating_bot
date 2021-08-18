@@ -326,19 +326,9 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
         has_children=translate_choice(has_children),
     )
     user = db.get_user(callback.from_user.id)
-    user_data = f"Имя: {user.name}\n" \
-                f"Возраст: {user.age}\n" \
-                f"Национальность: {user.nationality}\n" \
-                f"Образование: {user.education}\n" \
-                f"Город, где получали образование: {user.education_city}\n" \
-                f"Город текущего проживания: {user.city}\n" \
-                f"Есть автомобиль: {user.has_car}\n" \
-                f"Есть собственное жилье: {user.has_own_housing}\n" \
-                f"Профессия: {user.profession}\n" \
-                f"Семейное положение: {user.marital_status}\n" \
-                f"Есть дети: {user.has_children}"
+    user_data_test = create_message_by_user_questionnaire(user)
     await callback.message.answer(
-        text=f"Ваши данные:\n{user_data}"
+        text=user_data_test
     )
 
     await callback.message.answer(

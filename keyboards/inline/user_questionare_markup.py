@@ -9,6 +9,7 @@ education_city_callback = CallbackData('chosen_education_city', 'education_city'
 city_callback = CallbackData('user_city', 'city')
 profession_callback = CallbackData('chosen_profession', 'profession')
 marital_status_callback = CallbackData('chosen_marital_status', 'marital_status')
+change_user_data_callback = CallbackData('chosen_item', 'item')
 
 
 def get_callback_by_name(callback_name):
@@ -84,6 +85,70 @@ def nationality_markup(nationalities):
             x += 2
     return markup
 
+
+def change_search_questionnaire_markup():
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            text='Диапазон возраста',
+            callback_data=change_user_data_callback.new('age_range')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Национальность',
+            callback_data=change_user_data_callback.new('nationality')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Образование',
+            callback_data=change_user_data_callback.new('education')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Город, где получал образование',
+            callback_data=change_user_data_callback.new('education_city')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Город проживания',
+            callback_data=change_user_data_callback.new('city')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Чем должен заниматься',
+            callback_data=change_user_data_callback.new('profession')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Семейное положение',
+            callback_data=change_user_data_callback.new('marital_status')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Должен ли быть автомобиль',
+            callback_data=change_user_data_callback.new('has_car')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Должно ли быть собственное жилье',
+            callback_data=change_user_data_callback.new('has_own_housing')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Могут ли быть дети',
+            callback_data=change_user_data_callback.new('has_children')
+        )
+    )
+    return markup
 
 
 

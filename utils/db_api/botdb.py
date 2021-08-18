@@ -20,3 +20,9 @@ def get_user_questions():
 def get_search_questions():
     return SearchQuestions.objects.all()
 
+
+def create_questionnaire(user, **kwargs):
+    Questionnaires.objects.create()
+
+
+

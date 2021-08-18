@@ -11,24 +11,36 @@ profession_callback = CallbackData('chosen_profession', 'profession')
 marital_status_callback = CallbackData('chosen_marital_status', 'marital_status')
 
 
-def universal_markup(data_list: list, callback_name):
-    markup = InlineKeyboardMarkup()
+def get_callback_by_name(callback_name):
     callback_data = None
+    if callback_name == 'education_city_callback':
+        callback_data = education_city_callback
+    elif callback_name == 'education_callback':
+        callback_data = education_callback
+    elif callback_name == 'city_callback':
+        callback_data = city_callback
+    elif callback_name == 'profession_callback':
+        callback_data = profession_callback
+    elif callback_name == 'marital_status_callback':
+        callback_data = marital_status_callback
+    return callback_data
+
+
+def universal_markup(data_list: list, callback_name, does_not_matter=False):
+    markup = InlineKeyboardMarkup()
+    callback = get_callback_by_name(callback_name)
     for item in enumerate(data_list):
-        if callback_name == 'education_city_callback':
-            callback_data = education_city_callback.new(item[0])
-        elif callback_name == 'education_callback':
-            callback_data = education_callback.new(item[0])
-        elif callback_name == 'city_callback':
-            callback_data = city_callback.new(item[0])
-        elif callback_name == 'profession_callback':
-            callback_data = profession_callback.new(item[0])
-        elif callback_name == 'marital_status_callback':
-            callback_data = marital_status_callback.new(item[0])
         markup.add(
             InlineKeyboardButton(
                 text=item[1],
-                callback_data=callback_data
+                callback_data=callback.new(item[0])
+            )
+        )
+    if does_not_matter:
+        markup.add(
+            InlineKeyboardButton(
+                text="Не имеет значения",
+                callback_data=callback.new(-1)
             )
         )
     return markup

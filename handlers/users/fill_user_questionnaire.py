@@ -9,19 +9,7 @@ from states.fill_user_questionnaire import FillUserQuestionnaire
 from utils.db_api import botdb as db
 from keyboards.inline.user_questionare_markup import *
 from keyboards.inline.yes_or_no_markup import yes_or_no_markup, yes_or_no_callback
-
-
-def prepare_answers(answers):
-    answers = answers.split('\n')
-    return answers
-
-
-def translate_choice(choice):
-    return {
-        "yes": "Да",
-        "no": "Нет",
-        "does_not_matter": "Не имеет значения"
-    }.get(choice)
+from .utils import *
 
 
 # Имя
@@ -215,7 +203,8 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
         )
         await FillUserQuestionnaire.has_car.set()
         
-        
+
+# Город
 @dp.message_handler(state=FillUserQuestionnaire.get_city)
 async def get_city_message(message: types.Message, state: FSMContext):
     city = message.text
@@ -230,6 +219,7 @@ async def get_city_message(message: types.Message, state: FSMContext):
         reply_markup=yes_or_no_markup('has_car')
     )
     await FillUserQuestionnaire.has_car.set()
+
 
 # Есть ли машина (кнопка)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='has_car'), state=FillUserQuestionnaire.has_car)

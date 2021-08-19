@@ -31,3 +31,11 @@ def get_questionnaire_by_user(user):
 
 def update_search_questionnaire(user, **kwargs):
     Questionnaires.objects.filter(user=user).update(**kwargs)
+
+
+def get_search_question_by_id(question_id):
+    return SearchQuestions.objects.filter(question_id=question_id).first()
+
+
+
+

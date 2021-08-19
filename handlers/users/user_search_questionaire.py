@@ -9,7 +9,7 @@ from keyboards.default.questionnaire_markups import fill_user_questionnaire
 from .utils import create_message_by_search_questionnaire
 
 
-@dp.message_handler(text="Данные для поиска")
+@dp.message_handler(text="Данные для поиска 🔍")
 async def bot_start(message: types.Message):
     user = db.get_user(message.from_user.id)
     q = db.get_questionnaire_by_user(user)

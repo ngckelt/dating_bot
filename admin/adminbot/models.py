@@ -10,7 +10,9 @@ class TimeBasedModel(models.Model):
 
 
 class Users(TimeBasedModel):
+    active_to_search = models.BooleanField(verbose_name="Активен для поиска", default=True)
     telegram_id = models.CharField(verbose_name="ID в телеграмме", max_length=20)
+    username = models.CharField(verbose_name="Юзернейм", max_length=256, null=True)
     name = models.CharField(verbose_name="Имя", max_length=255)
     age = models.CharField(verbose_name="Возраст", max_length=2)
     nationality = models.CharField(verbose_name="Национальность", max_length=255)
@@ -24,6 +26,8 @@ class Users(TimeBasedModel):
     has_children = models.CharField(verbose_name="Есть ли дети", max_length=255)
 
     def __str__(self):
+        if self.username:
+            return self.username
         return self.telegram_id
 
     class Meta:

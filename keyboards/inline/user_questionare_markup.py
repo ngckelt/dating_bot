@@ -151,6 +151,76 @@ def change_search_questionnaire_markup():
     return markup
 
 
+def change_user_data_markup():
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            text='Имя',
+            callback_data=change_user_data_callback.new('name')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Возраст',
+            callback_data=change_user_data_callback.new('age')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Нициональность',
+            callback_data=change_user_data_callback.new('nationality')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Образование',
+            callback_data=change_user_data_callback.new('education')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Город, где получали образование',
+            callback_data=change_user_data_callback.new('education_city')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Город',
+            callback_data=change_user_data_callback.new('city')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Чем занимаетесь',
+            callback_data=change_user_data_callback.new('profession')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Семейное положение',
+            callback_data=change_user_data_callback.new('marital_status')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Есть ли автомобиль',
+            callback_data=change_user_data_callback.new('has_car')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Есть ли собственное жилье',
+            callback_data=change_user_data_callback.new('has_own_housing')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Есть ли дети',
+            callback_data=change_user_data_callback.new('has_children')
+        )
+    )
+    return markup
+
 
 # def get_marital_status_markup(statuses):
 #     markup = InlineKeyboardMarkup(row_width=1)

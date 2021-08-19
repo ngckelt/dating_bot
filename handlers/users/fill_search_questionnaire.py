@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from keyboards.default.main_markup import main_markup
+from keyboards.default.questionnaire_markups import cancel_fill_markup, fill_search_questionnaire
 from loader import dp
 from states.fill_search_questionnaire import FillSearchQuestionnaire
 from utils.db_api import botdb as db
@@ -12,8 +13,36 @@ from keyboards.inline.yes_or_no_markup import yes_or_no_markup, yes_or_no_callba
 from .utils import *
 
 
+@dp.message_handler(text="Заполнить анкету заново 🔄", state=FillSearchQuestionnaire)
+async def reset_fill(message: types.Message, state: FSMContext):
+    user = db.get_user(message.from_user.id)
+    questionnaire = db.get_questionnaire_by_user(user)
+    if not questionnaire:
+        questions = db.get_search_questions()
+        current_question = 1
+        await state.update_data(questions=questions, current_question=current_question)
+        await message.answer(
+            # Спрашиваем возрасто от X до X
+            text=f"Вопрос {current_question}/10\n{questions[current_question - 1].question}",
+            reply_markup=cancel_fill_markup()
+        )
+        await FillSearchQuestionnaire.get_age.set()
+    else:
+        await message.answer("У вас уже есть заполненная анкета")
+
+
+@dp.message_handler(text="Отменить заполнение анкеты ❌", state=FillSearchQuestionnaire)
+async def cancel_fill(message: types.Message, state: FSMContext):
+    await message.answer(
+        text="Заполнение анкеты отменено. Вы можоте вернуться к заполнению анкеты в удобное для Вас время, "
+             "еще раз нажав кнопку ниже",
+        reply_markup=fill_search_questionnaire()
+    )
+    await state.finish()
+
+
 # Начало
-@dp.message_handler(text="Заполнить анкету для поиска ✅")
+@dp.message_handler(text="Заполнить анкету для поиска 📝")
 async def bot_start(message: types.Message, state: FSMContext):
     user = db.get_user(message.from_user.id)
     questionnaire = db.get_questionnaire_by_user(user)
@@ -24,7 +53,7 @@ async def bot_start(message: types.Message, state: FSMContext):
         await message.answer(
             # Спрашиваем возрасто от X до X
             text=f"Вопрос {current_question}/10\n{questions[current_question - 1].question}",
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=cancel_fill_markup()
         )
         await FillSearchQuestionnaire.get_age.set()
     else:

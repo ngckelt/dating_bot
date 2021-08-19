@@ -3,25 +3,50 @@ from pprint import pprint
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from keyboards.default.questionnaire_markups import fill_search_questionnaire
+from keyboards.default.questionnaire_markups import fill_search_questionnaire, fill_user_questionnaire
 from loader import dp
 from states.fill_user_questionnaire import FillUserQuestionnaire
 from utils.db_api import botdb as db
 from keyboards.inline.user_questionare_markup import *
 from keyboards.inline.yes_or_no_markup import yes_or_no_markup, yes_or_no_callback
+from keyboards.default.questionnaire_markups import cancel_fill_markup
 from .utils import *
 
 
-# Имя
-@dp.message_handler(text="Заполнить анкету о себе ✅")
+@dp.message_handler(text="Заполнить анкету заново 🔄", state=FillUserQuestionnaire)
+async def reset_fill(message: types.Message, state: FSMContext):
+    await state.finish()
+    questions = db.get_user_questions()
+    current_question = 1
+    await state.update_data(questions=questions, current_question=current_question)
+    await message.answer(
+        # Спрашиваем имя
+        text=f"Вопрос {current_question}/11\n{questions[current_question - 1].question}",
+        reply_markup=cancel_fill_markup()
+    )
+    await FillUserQuestionnaire.get_name.set()
+
+
+@dp.message_handler(text="Отменить заполнение анкеты ❌", state=FillUserQuestionnaire)
+async def cancel_fill(message: types.Message, state: FSMContext):
+    await message.answer(
+        text="Заполнение анкеты отменено. Вы можоте вернуться к заполнению анкеты в удобное для Вас время, "
+             "еще раз нажав кнопку ниже",
+        reply_markup=fill_user_questionnaire()
+    )
+    await state.finish()
+
+
+# Начало
+@dp.message_handler(text="Заполнить анкету о себе 📝")
 async def bot_start(message: types.Message, state: FSMContext):
     questions = db.get_user_questions()
     current_question = 1
     await state.update_data(questions=questions, current_question=current_question)
     await message.answer(
         # Спрашиваем имя
-        text=f"Вопрос {current_question}/11\n{questions[current_question-1].question}",
-        reply_markup=types.ReplyKeyboardRemove()
+        text=f"Вопрос {current_question}/11\n{questions[current_question - 1].question}",
+        reply_markup=cancel_fill_markup()
     )
     await FillUserQuestionnaire.get_name.set()
 
@@ -37,7 +62,7 @@ async def get_name(message: types.Message, state: FSMContext):
     current_question += 1
     await state.update_data(name=name, current_question=current_question)
     # Спрашиваем возраст
-    await message.answer(text=questions[current_question-1].question)
+    await message.answer(text=questions[current_question - 1].question)
     await FillUserQuestionnaire.get_age.set()
 
 
@@ -57,7 +82,7 @@ async def get_age(message: types.Message, state: FSMContext):
             # Спрашиваем национальность
             await state.update_data(nationalities=answers)
             await message.answer(
-                text=f"Ворос {current_question}/11\n{questions[current_question-1].question}",
+                text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
                 reply_markup=nationality_markup(answers)
             )
             await FillUserQuestionnaire.get_nationality.set()
@@ -120,7 +145,7 @@ async def get_education(callback: types.CallbackQuery, callback_data: dict, stat
     state_data = await state.get_data()
     questions = state_data.get('questions')
     current_question = state_data.get('current_question')
-    educations = questions[current_question-1].answer_options.split('\n')
+    educations = questions[current_question - 1].answer_options.split('\n')
     current_question += 1
     education = educations[int(education_index)]
 
@@ -144,7 +169,7 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
     state_data = await state.get_data()
     questions = state_data.get('questions')
     current_question = state_data.get('current_question')
-    education_cities = questions[current_question-1].answer_options.split('\n')
+    education_cities = questions[current_question - 1].answer_options.split('\n')
     if int(education_city_index) == len(education_cities) - 1:
         await callback.message.answer(text="Укажите город, в котором вы получали образование")
     else:
@@ -202,7 +227,7 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
             reply_markup=yes_or_no_markup('has_car')
         )
         await FillUserQuestionnaire.has_car.set()
-        
+
 
 # Город
 @dp.message_handler(state=FillUserQuestionnaire.get_city)
@@ -313,6 +338,7 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
     has_children = callback_data.get('choice')
     db.add_user(
         telegram_id=callback.from_user.id,
+        username=callback.from_user.username,
         name=state_data.get('name'),
         age=state_data.get('age'),
         nationality=state_data.get('nationality'),
@@ -336,9 +362,3 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
         reply_markup=fill_search_questionnaire()
     )
     await state.finish()
-
-
-
-
-
-

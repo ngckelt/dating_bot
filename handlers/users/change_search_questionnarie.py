@@ -13,7 +13,7 @@ from .utils import prepare_answers, translate_choice
 from keyboards.inline.user_questionare_markup import *
 
 
-@dp.message_handler(text="Изменить данные для поиска")
+@dp.message_handler(text="Изменить данные для поиска 📝")
 async def bot_start(message: types.Message):
     user = db.get_user(message.from_user.id)
     q = db.get_questionnaire_by_user(user)
@@ -159,10 +159,7 @@ async def continue_changing(callback: types.CallbackQuery, callback_data: dict,
         await ChangeSearchQuestionnaire.chose_item.set()
     else:
         await callback.message.answer("Данные успешно изменены")
-        # user = db.get_user(callback.message.from_user.id)
-        # q = db.get_questionnaire_by_user(user)
-        # message_text = create_message_by_search_questionnaire(q)
-        # await callback.message.answer(message_text)
+        # Тут можно сделать вывод новой анкеты
         await state.finish()
 
 
@@ -302,3 +299,6 @@ async def chose_item_error(message: types.Message, state: FSMContext):
     await message.answer(
         text="Пожалуйста, выберите один из вариантов ответа"
     )
+
+
+

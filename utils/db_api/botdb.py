@@ -13,6 +13,10 @@ def get_user(user_telegram_id):
     return Users.objects.filter(telegram_id=user_telegram_id).first()
 
 
+def update_user(user_telegram_id, **kwargs):
+    Users.objects.filter(telegram_id=user_telegram_id).update(**kwargs)
+
+
 def get_user_questions():
     return UserQuestions.objects.all()
 
@@ -37,5 +41,7 @@ def get_search_question_by_id(question_id):
     return SearchQuestions.objects.filter(question_id=question_id).first()
 
 
+def get_user_question_by_id(question_id):
+    return UserQuestions.objects.filter(question_id=question_id).first()
 
 

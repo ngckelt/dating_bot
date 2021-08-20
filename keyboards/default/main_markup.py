@@ -12,6 +12,10 @@ def main_markup():
                 KeyboardButton(text=f"Изменить данные о себе ✏️"),
                 KeyboardButton(text=f"Изменить данные для поиска 📝"),
             ],
+            [
+                KeyboardButton(text=f"Удалить мои данные ❌️"),
+                KeyboardButton(text=f"Изменить статус для поиска 🖌️️"),
+            ],
         ],
         resize_keyboard=True
     )

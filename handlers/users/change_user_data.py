@@ -60,7 +60,9 @@ async def continue_changing(callback: types.CallbackQuery, callback_data: dict,
         await ChangeUserData.chose_item.set()
     else:
         await callback.message.answer("Данные успешно изменены")
-        # Тут можно сделать вывод новой анкеты
+        user = db.get_user(callback.from_user.id)
+        message_text = create_message_by_user_questionnaire(user)
+        await callback.message.answer(message_text)
         await state.finish()
 
 

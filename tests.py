@@ -1,14 +1,10 @@
 
 
-class Test:
-
-    a = 1
-    b = 2
+from utils.cities.cities import check_city
 
 
-t = Test()
+x = check_city("Санкт петербург")
 
-t.__setattr__('c', 3)
 
-print(t.c)
+print(x)
 

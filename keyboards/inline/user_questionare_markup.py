@@ -10,6 +10,24 @@ city_callback = CallbackData('user_city', 'city')
 profession_callback = CallbackData('chosen_profession', 'profession')
 marital_status_callback = CallbackData('chosen_marital_status', 'marital_status')
 change_user_data_callback = CallbackData('chosen_item', 'item')
+change_search_status_callback = CallbackData('chosen_status', 'status')
+
+
+def change_search_status_markup():
+    markup = InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton(
+            text="Активный",
+            callback_data=change_search_status_callback.new("active")
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text="Неактивный",
+            callback_data=change_search_status_callback.new("inactive")
+        )
+    )
+    return markup
 
 
 def get_callback_by_name(callback_name):

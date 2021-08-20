@@ -10,6 +10,7 @@ from utils.db_api import botdb as db
 from keyboards.inline.user_questionare_markup import *
 from keyboards.inline.yes_or_no_markup import yes_or_no_markup, yes_or_no_callback
 from keyboards.default.questionnaire_markups import cancel_fill_markup
+from utils.cities.cities import check_city
 from .utils import *
 
 
@@ -206,7 +207,7 @@ async def get_education_city_message(message: types.Message, state: FSMContext):
     await FillUserQuestionnaire.get_city.set()
 
 
-# Город проживания
+# Город проживания (кнопка)
 @dp.callback_query_handler(city_callback.filter(), state=FillUserQuestionnaire.get_city)
 async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -229,21 +230,54 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
         await FillUserQuestionnaire.has_car.set()
 
 
-# Город
+# Город (сообщение)
 @dp.message_handler(state=FillUserQuestionnaire.get_city)
 async def get_city_message(message: types.Message, state: FSMContext):
-    city = message.text
-    state_data = await state.get_data()
-    questions = state_data.get('questions')
-    current_question = state_data.get('current_question')
-    current_question += 1
-    await state.update_data(city=city, current_question=current_question)
-    await message.answer(
-        # Спрашиваем есть ли автомобиль
-        text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
-        reply_markup=yes_or_no_markup('has_car')
-    )
-    await FillUserQuestionnaire.has_car.set()
+    city = message.text.capitalize()
+    city_data = check_city(city)
+    if city_data['equal']:
+        state_data = await state.get_data()
+        questions = state_data.get('questions')
+        current_question = state_data.get('current_question')
+        current_question += 1
+        await state.update_data(city=city, current_question=current_question)
+        await message.answer(
+            # Спрашиваем есть ли автомобиль
+            text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
+            reply_markup=yes_or_no_markup('has_car')
+        )
+        await FillUserQuestionnaire.has_car.set()
+    elif city_data['candidate'] is not None:
+        # Уточняем город
+        await state.update_data(city_candidate=city_data['candidate'])
+        await message.answer(
+            text=f"Возможно, вы имели в виду {city_data['candidate']}?",
+            reply_markup=yes_or_no_markup('city_candidate')
+        )
+    else:
+        await message.answer("Не удалось распознать Ваш город. Попробуйте еще раз")
+
+
+# Проверка города (сообщение)
+@dp.callback_query_handler(yes_or_no_callback.filter(question='city_candidate'), state=FillUserQuestionnaire.get_city)
+async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    await callback.answer()
+    choice = callback_data.get('choice')
+    if choice == 'yes':
+        state_data = await state.get_data()
+        questions = state_data.get('questions')
+        current_question = state_data.get('current_question')
+        current_question += 1
+        await state.update_data(city=state_data.get('city_candidate'), current_question=current_question)
+        await callback.message.answer(
+            # Спрашиваем есть ли автомобиль
+            text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
+            reply_markup=yes_or_no_markup('has_car')
+        )
+    else:
+        await callback.message.answer(
+            text="Укажите Ваш город еще раз"
+        )
 
 
 # Есть ли машина (кнопка)

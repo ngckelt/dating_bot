@@ -45,3 +45,15 @@ def get_user_question_by_id(question_id):
     return UserQuestions.objects.filter(question_id=question_id).first()
 
 
+def delete_user(user_telegram_id):
+    Users.objects.filter(telegram_id=user_telegram_id).delete()
+
+
+def change_user_search_status(user_telegram_id, status):
+    Users.objects.filter(telegram_id=user_telegram_id).update(active_to_search=status)
+
+
+
+
+
+

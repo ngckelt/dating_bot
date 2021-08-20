@@ -35,7 +35,12 @@ def is_correct_age_range(age_range):
 
 
 def create_message_by_user_questionnaire(user):
+    search_status = "Да"
+    if not user.active_to_search:
+        search_status = "Нет"
     message = f"Ваши данные:\n" \
+              f"Активен для поиска: {search_status}\n" \
+              f"Юзернейм: {user.username}\n" \
               f"Имя: {user.name}\n" \
               f"Возраст: {user.age}\n" \
               f"Национальность: {user.nationality}\n" \

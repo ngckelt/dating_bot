@@ -4,7 +4,7 @@ from keyboards.inline.user_questionare_markup import change_search_status_markup
 from utils.db_api import botdb as db
 
 
-@dp.message_handler(text="Изменить статус для поиска 🖌️")
+@dp.message_handler(text="Изменить статус для поиска️")
 async def change_user_search_status(message: types.Message):
     await message.answer(
         text="Выберите статус",

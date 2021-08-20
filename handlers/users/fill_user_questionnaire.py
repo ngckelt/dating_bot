@@ -274,6 +274,7 @@ async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict,
             text=f"Ворос {current_question}/11\n{questions[current_question - 1].question}",
             reply_markup=yes_or_no_markup('has_car')
         )
+        await FillUserQuestionnaire.has_car.set()
     else:
         await callback.message.answer(
             text="Укажите Ваш город еще раз"

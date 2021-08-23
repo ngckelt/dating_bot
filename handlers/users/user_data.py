@@ -1,4 +1,5 @@
 from pprint import pprint
+import json
 
 from aiogram import types
 from aiogram.dispatcher.filters.builtin import CommandStart
@@ -26,6 +27,7 @@ async def bot_start(message: types.Message):
     #     )
     # print(candidates)
     user = db.get_user(message.from_user.id)
+    db.update_known_users(message.from_user.id, '893534')
     message_text = create_message_by_user_questionnaire(user)
     await message.answer(message_text, parse_mode="HTML")
 

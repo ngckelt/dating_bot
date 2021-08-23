@@ -70,6 +70,12 @@ def change_user_search_status(user_telegram_id, status):
     Users.objects.filter(telegram_id=user_telegram_id).update(active_to_search=status)
 
 
+def update_known_users(user_telegram_id, new_user_telegram_id):
+    user = get_user(user_telegram_id)
+    known_users = user.known_users
+    known_users['known_users'].append(new_user_telegram_id)
+    update_user(user_telegram_id, known_users=known_users)
+
 
 
 

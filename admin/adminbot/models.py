@@ -25,6 +25,7 @@ class Users(TimeBasedModel):
     has_car = models.CharField(verbose_name="Есть ли автомобиль", max_length=255)
     has_own_housing = models.CharField(verbose_name="Есть ли собственное жилье", max_length=255)
     has_children = models.CharField(verbose_name="Есть ли дети", max_length=255)
+    known_users = models.JSONField(verbose_name="Известные пользователи", default={'known_users': []})
 
     def __str__(self):
         if self.username:

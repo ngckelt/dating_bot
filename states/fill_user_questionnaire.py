@@ -4,6 +4,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 class FillUserQuestionnaire(StatesGroup):
     get_name = State()
     get_age = State()
+    get_gender = State()
     get_nationality = State()
     get_education = State()
     get_education_city = State()

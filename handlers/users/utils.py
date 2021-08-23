@@ -1,3 +1,6 @@
+from pprint import pprint
+
+
 def prepare_answers(answers):
     answers = answers.split('\n')
     return answers
@@ -9,6 +12,19 @@ def translate_choice(choice):
         "no": "Нет",
         "does_not_matter": "Не имеет значения"
     }.get(choice)
+
+
+def is_correct_age(age):
+    response = {'correct': False, 'message': None}
+    try:
+        age = int(age)
+        if age in range(18, 71):
+            response['correct'] = True
+        else:
+            response['message'] = "Возраст должен быть в диапазоне от 18 до 70"
+    except ValueError:
+        response['message'] = "Возраст должен быть указан целым числом"
+    return response
 
 
 def is_correct_age_range(age_range):
@@ -36,37 +52,45 @@ def is_correct_age_range(age_range):
 
 def create_message_by_user_questionnaire(user):
     search_status = "Да"
+    status_emoji = "🟢"
     if not user.active_to_search:
         search_status = "Нет"
-    message = f"Ваши данные:\n" \
-              f"Активен для поиска: {search_status}\n" \
-              f"Юзернейм: {user.username}\n" \
-              f"Имя: {user.name}\n" \
-              f"Возраст: {user.age}\n" \
-              f"Национальность: {user.nationality}\n" \
-              f"Образование: {user.education}\n" \
-              f"Город, где получали образование: {user.education_city}\n" \
-              f"Город текущего проживания: {user.city}\n" \
-              f"Есть автомобиль: {user.has_car}\n" \
-              f"Есть собственное жилье: {user.has_own_housing}\n" \
-              f"Профессия: {user.profession}\n" \
-              f"Семейное положение: {user.marital_status}\n" \
-              f"Есть дети: {user.has_children}"
+        status_emoji = "🔴"
+    pprint(user.gender)
+    if user.gender == "Мужской\r":
+        gender_emoji = "🙎‍♂️"
+    else:
+        gender_emoji = "🙍‍♀️"
+    message = f"Ваши данные:\n\n" \
+              f"{status_emoji} Активен для поиска: <b>{search_status}</b>\n\n" \
+              f"🆔 Юзернейм: <b>{user.username}</b>\n\n" \
+              f"🆗 Имя: <b>{user.name}</b>\n\n" \
+              f"{gender_emoji} Пол: <b>{user.gender}</b>\n\n" \
+              f"✅ Возраст: <b>{user.age}\n\n</b>" \
+              f"🏳️ Национальность: <b>{user.nationality}</b>\n\n" \
+              f"🎓 Образование: <b>{user.education}</b>\n\n" \
+              f"🏙 Город, где получали образование: <b>{user.education_city}</b>\n\n" \
+              f"🌆 Город текущего проживания: <b>{user.city}</b>\n\n" \
+              f"🚗 Есть автомобиль: <b>{user.has_car}</b>\n\n" \
+              f"🏡 Есть собственное жилье: <b>{user.has_own_housing}</b>\n\n" \
+              f"💼 Род деятельности: <b>{user.profession}</b>\n\n" \
+              f"💍 Семейное положение: <b>{user.marital_status}</b>\n\n" \
+              f"👶 Есть дети: <b>{user.has_children}</b>"
     return message
 
 
 def create_message_by_search_questionnaire(questionnaire):
-    message = f"Ваша анкета для поиска:\n" \
-              f"Диапазон возраста: {questionnaire.age_range}\n" \
-              f"Национальность: {questionnaire.nationality}\n" \
-              f"Образование: {questionnaire.education}\n" \
-              f"Город, где получали образование: {questionnaire.education_city}\n" \
-              f"Город текущего проживания: {questionnaire.city}\n" \
-              f"Должен ли быть автомобиль: {questionnaire.has_car}\n" \
-              f"Должно ли быть собственное жилье: {questionnaire.has_own_housing}\n" \
-              f"Чем должны заниматься: {questionnaire.profession}\n" \
-              f"Семейное положение: {questionnaire.marital_status}\n" \
-              f"Могут ли быть дети: {questionnaire.has_children}\n"
+    message = f"📋 Ваша анкета для поиска:\n\n" \
+              f"✅ Диапазон возраста: <b>{questionnaire.age_range}</b>\n\n" \
+              f"🏳️ Национальность: <b>{questionnaire.nationality}</b>\n\n" \
+              f"🎓 Образование: <b>{questionnaire.education}</b>\n\n" \
+              f"🏙 Город, где получали образование: <b>{questionnaire.education_city}</b>\n\n" \
+              f"🌆 Город текущего проживания: <b>{questionnaire.city}</b>\n\n" \
+              f"🚗 Должен ли быть автомобиль: <b>{questionnaire.has_car}</b>\n\n" \
+              f"🏡 Должно ли быть собственное жилье: <b>{questionnaire.has_own_housing}</b>\n\n" \
+              f"💼 Чем должны заниматься: <b>{questionnaire.profession}</b>\n\n" \
+              f"💍 Семейное положение: <b>{questionnaire.marital_status}</b>\n\n" \
+              f"👶 Могут ли быть дети: <b>{questionnaire.has_children}</b>\n\n"
     return message
 
 

@@ -14,6 +14,7 @@ class Users(TimeBasedModel):
     telegram_id = models.CharField(verbose_name="ID в телеграмме", max_length=20)
     username = models.CharField(verbose_name="Юзернейм", max_length=256, null=True)
     name = models.CharField(verbose_name="Имя", max_length=255)
+    gender = models.CharField(verbose_name="Пол", max_length=20, null=True)
     age = models.CharField(verbose_name="Возраст", max_length=2)
     nationality = models.CharField(verbose_name="Национальность", max_length=255)
     education = models.CharField(verbose_name="Образование", max_length=255)

@@ -2,7 +2,8 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 
 class FillSearchQuestionnaire(StatesGroup):
-    get_age = State()
+    get_min_age = State()
+    get_max_age = State()
     get_nationality = State()
     get_education = State()
     get_education_city = State()

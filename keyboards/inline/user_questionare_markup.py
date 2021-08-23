@@ -11,6 +11,7 @@ profession_callback = CallbackData('chosen_profession', 'profession')
 marital_status_callback = CallbackData('chosen_marital_status', 'marital_status')
 change_user_data_callback = CallbackData('chosen_item', 'item')
 change_search_status_callback = CallbackData('chosen_status', 'status')
+gender_callback = CallbackData('chosen_gender', 'gender')
 
 
 def change_search_status_markup():
@@ -42,6 +43,8 @@ def get_callback_by_name(callback_name):
         callback_data = profession_callback
     elif callback_name == 'marital_status_callback':
         callback_data = marital_status_callback
+    elif callback_name == 'gender_callback':
+        callback_data = gender_callback
     return callback_data
 
 
@@ -181,6 +184,12 @@ def change_user_data_markup():
         InlineKeyboardButton(
             text='Возраст',
             callback_data=change_user_data_callback.new('age')
+        )
+    )
+    markup.add(
+        InlineKeyboardButton(
+            text='Пол',
+            callback_data=change_user_data_callback.new('gender')
         )
     )
     markup.add(

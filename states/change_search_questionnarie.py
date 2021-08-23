@@ -4,7 +4,8 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 class ChangeSearchQuestionnaire(StatesGroup):
     chose_item = State()
     change_item = State()
-    change_age = State()
+    change_min_age = State()
+    change_max_age = State()
     change_nationality = State()
     change_education = State()
     change_education_city = State()

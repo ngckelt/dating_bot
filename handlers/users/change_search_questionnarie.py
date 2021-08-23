@@ -5,9 +5,11 @@ from aiogram.dispatcher import FSMContext
 from keyboards.default.main_markup import main_markup
 from keyboards.inline.yes_or_no_markup import yes_or_no_markup, yes_or_no_callback
 from loader import dp
+from utils.cities.cities import check_city
 from utils.db_api import botdb as db
 from keyboards.default.questionnaire_markups import fill_user_questionnaire
-from .utils import create_message_by_user_questionnaire, is_correct_age_range, create_message_by_search_questionnaire
+from .utils import create_message_by_user_questionnaire, is_correct_age_range, create_message_by_search_questionnaire, \
+    is_correct_age
 from states.change_search_questionnarie import ChangeSearchQuestionnaire
 from .utils import prepare_answers, translate_choice
 from keyboards.inline.user_questionare_markup import *
@@ -37,17 +39,30 @@ async def bot_start(message: types.Message):
 Семейное положение - 9
 Дети - 10
 """
+MIN_AGE_ID = "1"
+MAX_AGE_ID = "2"
+NATIONALITY_ID = "3"
+EDUCATION_ID = "4"
+EDUCATION_CITY_ID = "5"
+CITY_ID = "6"
+HAS_CAR_ID = "7"
+HAS_OWN_HOUSING_ID = "8"
+PROFESSION_ID = "9"
+MARITAL_STATUS_ID = "10"
+HAS_CHILDREN_ID = "11"
 
 
 @dp.callback_query_handler(change_user_data_callback.filter(), state=ChangeSearchQuestionnaire.chose_item)
 async def get_change_item(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     item = callback_data.get('item')
+    # Диапазон возраста
     if item == 'age_range':
-        await callback.message.answer(text="Укажите новый возрастной диапазон")
-        await ChangeSearchQuestionnaire.change_age.set()
+        await callback.message.answer(text="Укажите новый минимальный возраст")
+        await ChangeSearchQuestionnaire.change_min_age.set()
+    # Национальность
     elif item == 'nationality':
-        question = db.get_search_question_by_id("2")
+        question = db.get_search_question_by_id(NATIONALITY_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -55,8 +70,9 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
             reply_markup=nationality_markup(answers)
         )
         await ChangeSearchQuestionnaire.change_nationality.set()
+    # Образование
     elif item == 'education':
-        question = db.get_search_question_by_id("3")
+        question = db.get_search_question_by_id(EDUCATION_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -67,8 +83,9 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
             )
         )
         await ChangeSearchQuestionnaire.change_education.set()
+    # Город образования
     elif item == 'education_city':
-        question = db.get_search_question_by_id("4")
+        question = db.get_search_question_by_id(EDUCATION_CITY_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -76,12 +93,12 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
             reply_markup=universal_markup(
                 answers,
                 'education_city_callback',
-                does_not_matter=True
             )
         )
         await ChangeSearchQuestionnaire.change_education_city.set()
+    # Город
     elif item == 'city':
-        question = db.get_search_question_by_id("5")
+        question = db.get_search_question_by_id(CITY_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -89,12 +106,12 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
             reply_markup=universal_markup(
                 answers,
                 'city_callback',
-                does_not_matter=True
             )
         )
         await ChangeSearchQuestionnaire.change_city.set()
+    # Чем должен заниматься
     elif item == 'profession':
-        question = db.get_search_question_by_id("8")
+        question = db.get_search_question_by_id(PROFESSION_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -106,8 +123,9 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
             )
         )
         await ChangeSearchQuestionnaire.change_profession.set()
+    # Семейное положение
     elif item == 'marital_status':
-        question = db.get_search_question_by_id("9")
+        question = db.get_search_question_by_id(MARITAL_STATUS_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -118,18 +136,21 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
             )
         )
         await ChangeSearchQuestionnaire.change_marital_status.set()
+    # Есть ли автомобиль
     elif item == 'has_car':
         await callback.message.answer(
             text="Должен ли быть автомобиль",
             reply_markup=yes_or_no_markup('has_car', does_not_matter=True)
         )
         await ChangeSearchQuestionnaire.change_has_car.set()
+    # Есть ли собственное жилье
     elif item == 'has_own_housing':
         await callback.message.answer(
             text="Должно ли быть собственное жилье",
             reply_markup=yes_or_no_markup('has_own_housing', does_not_matter=True)
         )
         await ChangeSearchQuestionnaire.change_has_own_housing.set()
+    # Есть ли дети
     elif item == 'has_children':
         await callback.message.answer(
             text="Могут ли быть дети",
@@ -167,14 +188,31 @@ async def continue_changing(callback: types.CallbackQuery, callback_data: dict,
         await state.finish()
 
 
-@dp.message_handler(state=ChangeSearchQuestionnaire.change_age)
-async def change_age_range(message: types.Message, state: FSMContext):
-    check = is_correct_age_range(message.text)
+# Меняем минимальный возросат
+@dp.message_handler(state=ChangeSearchQuestionnaire.change_min_age)
+async def change_min_age(message: types.Message, state: FSMContext):
+    check = is_correct_age(message.text)
     if check.get('correct'):
-        user = db.get_user(message.from_user.id)
-        n1, n2 = check.get('n1'), check.get('n2')
-        db.update_search_questionnaire(user, age_range=f"{n1} {n2}")
-        await ask_to_continue_changing(message)
+        await state.update_data(min_age=message.text)
+        await message.answer(text="Укажите максимальный возраст")
+        await ChangeSearchQuestionnaire.change_max_age.set()
+    else:
+        await message.answer(check.get('message'))
+
+
+# Меняем максимальный возраст
+@dp.message_handler(state=ChangeSearchQuestionnaire.change_max_age)
+async def change_max_age(message: types.Message, state: FSMContext):
+    check = is_correct_age(message.text)
+    if check.get('correct'):
+        state_data = await state.get_data()
+        if int(message.text) > int(state_data.get('min_age')):
+            user = db.get_user(message.from_user.id)
+            age_range = f"{state_data.get('min_age')} {message.text}"
+            db.update_search_questionnaire(user, age_range=age_range)
+            await ask_to_continue_changing(message)
+        else:
+            await message.answer("Максимальный возраст должен быть больше минимального")
     else:
         await message.answer(check.get('message'))
 
@@ -212,13 +250,47 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
     state_data = await state.get_data()
     educations = state_data.get('answers')
     education_city_index = callback_data.get('education_city')
-    if education_city_index == '-1':
-        chosen_education_city = "Не имеет значения"
+    if int(education_city_index) == len(educations) - 1:
+        await callback.message.answer("Укажите город")
     else:
         chosen_education_city = educations[int(education_city_index)]
-    user = db.get_user(callback.from_user.id)
-    db.update_search_questionnaire(user, education_city=chosen_education_city)
-    await ask_to_continue_changing(callback.message)
+        user = db.get_user(callback.from_user.id)
+        db.update_search_questionnaire(user, education_city=chosen_education_city)
+        await ask_to_continue_changing(callback.message)
+
+
+# Изменить город образования (сообщения)
+@dp.message_handler(state=ChangeSearchQuestionnaire.change_education_city)
+async def change_education_city_by_message(message: types.Message, state: FSMContext):
+    education_city = message.text
+    check = check_city(education_city)
+    if check.get('equal'):
+        user = db.get_user(message.from_user.id)
+        db.update_search_questionnaire(user, education_city=message.text)
+        await ask_to_continue_changing(message)
+    elif check.get('candidate'):
+        await state.update_data(education_city_candidate=check.get('candidate'))
+        await message.answer(
+            text=f"Возможно, Вы имели в виду {check.get('candidate')}?",
+            reply_markup=yes_or_no_markup('change_education_city')
+        )
+    else:
+        await message.answer("Не удалось распознать город")
+
+
+@dp.callback_query_handler(yes_or_no_callback.filter(question='change_education_city'),
+                           state=ChangeSearchQuestionnaire.change_education_city)
+async def get_education_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    await callback.answer()
+    choice = callback_data.get('choice')
+    if choice == 'yes':
+        state_data = await state.get_data()
+        user = db.get_user(callback.from_user.id)
+        print(state_data.get('education_city_candidate'))
+        db.update_search_questionnaire(user, education_city=state_data.get('education_city_candidate'))
+        await ask_to_continue_changing(callback.message)
+    else:
+        await callback.message.answer("Укажите город еще раз")
 
 
 # Город проживания (кнопка)
@@ -228,13 +300,47 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
     state_data = await state.get_data()
     cities = state_data.get('answers')
     city_index = callback_data.get('city')
-    if city_index == '-1':
-        chosen_city = "Не имеет значения"
+    if int(city_index) == len(cities) - 1:
+        await callback.message.answer("Укажите город")
     else:
         chosen_city = cities[int(city_index)]
-    user = db.get_user(callback.from_user.id)
-    db.update_search_questionnaire(user, city=chosen_city)
-    await ask_to_continue_changing(callback.message)
+        user = db.get_user(callback.from_user.id)
+        db.update_search_questionnaire(user, city=chosen_city)
+        await ask_to_continue_changing(callback.message)
+
+
+# Город проживания (сообщение)
+@dp.message_handler(state=ChangeSearchQuestionnaire.change_city)
+async def change_city_by_message(message: types.Message, state: FSMContext):
+    city = message.text
+    check = check_city(city)
+    if check.get('equal'):
+        user = db.get_user(message.from_user.id)
+        db.update_search_questionnaire(user, city=city)
+        await ask_to_continue_changing(message)
+    elif check.get('candidate'):
+        await state.update_data(city_candidate=check.get('candidate'))
+        await message.answer(
+            text=f"Возможно, Вы имели в виду {check.get('candidate')}?",
+            reply_markup=yes_or_no_markup('change_city')
+        )
+    else:
+        await message.answer("Не удалось распознать город")
+
+
+# Город проживания (кандидат)
+@dp.callback_query_handler(yes_or_no_callback.filter(question='change_city'),
+                           state=ChangeSearchQuestionnaire.change_city)
+async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    await callback.answer()
+    choice = callback_data.get('choice')
+    if choice == 'yes':
+        state_data = await state.get_data()
+        user = db.get_user(callback.from_user.id)
+        db.update_search_questionnaire(user, city=state_data.get('city_candidate'))
+        await ask_to_continue_changing(callback.message)
+    else:
+        await callback.message.answer("Укажите город еще раз")
 
 
 # Профессия

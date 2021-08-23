@@ -13,16 +13,29 @@ def get_user(user_telegram_id):
     return Users.objects.filter(telegram_id=user_telegram_id).first()
 
 
+def get_users():
+    return Users.objects.all()
+
+
 def update_user(user_telegram_id, **kwargs):
     Users.objects.filter(telegram_id=user_telegram_id).update(**kwargs)
 
 
+def prepare_questions(questions):
+    data = dict()
+    for question in questions:
+        data[question.question_id] = question
+    return data
+
+
 def get_user_questions():
-    return UserQuestions.objects.all()
+    questions = UserQuestions.objects.all()
+    return prepare_questions(questions)
 
 
 def get_search_questions():
-    return SearchQuestions.objects.all()
+    questions = SearchQuestions.objects.all()
+    return prepare_questions(questions)
 
 
 def create_questionnaire(**kwargs):
@@ -35,6 +48,10 @@ def get_questionnaire_by_user(user):
 
 def update_search_questionnaire(user, **kwargs):
     Questionnaires.objects.filter(user=user).update(**kwargs)
+
+
+def get_questionnaires():
+    return Questionnaires.objects.all()
 
 
 def get_search_question_by_id(question_id):

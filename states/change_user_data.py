@@ -5,6 +5,7 @@ class ChangeUserData(StatesGroup):
     chose_item = State()
     change_item = State()
     change_name = State()
+    change_gender = State()
     change_age = State()
     change_nationality = State()
     change_education = State()

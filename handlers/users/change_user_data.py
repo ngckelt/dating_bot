@@ -400,6 +400,9 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
     await ask_to_continue_changing(callback.message)
 
 
+@dp.message_handler(state=ChangeUserData)
+async def catch_message(message: types.Message):
+    await message.answer("Пожалуйста, выберите один из предоставленных пунктов")
 
 
 

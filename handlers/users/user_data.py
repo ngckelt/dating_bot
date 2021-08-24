@@ -14,15 +14,14 @@ from utils.cupid import cupid
 
 
 @dp.message_handler(text="Мои данные ✅")
-async def bot_start(message: types.Message):
-    try:
-        user = db.get_user(message.from_user.id)
+async def user_data(message: types.Message):
+    user = db.get_user(message.from_user.id)
+    if user is not None:
         if message.from_user.username:
             db.update_user(message.from_user.id, username=message.from_user.username)
-        db.update_known_users(message.from_user.id, '893534')
         message_text = create_message_by_user_questionnaire(user)
         await message.answer(message_text, parse_mode="HTML")
-    except AttributeError:
+    else:
         await message.answer("Чтобы воспользоваться ботом, Вам необходимо заполнить анкеты")
 
 

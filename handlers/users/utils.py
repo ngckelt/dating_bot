@@ -57,7 +57,6 @@ def create_message_by_user_questionnaire(user):
     if not user.active_to_search:
         search_status = "Нет"
         status_emoji = "🔴"
-    pprint(user.gender)
     if user.gender == "Мужской\r":
         gender_emoji = "🙎‍♂️"
     else:

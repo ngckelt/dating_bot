@@ -43,7 +43,7 @@ async def search_candidates():
 
 async def setup():
     print("task start")
-    aioschedule.every().day.at("20:22").do(search_candidates)
+    aioschedule.every().day.at("06:00").do(search_candidates)
 
     while True:
         await aioschedule.run_pending()

@@ -448,6 +448,10 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
         questionnaire_text,
         reply_markup=main_markup()
     )
+    await callback.message.answer("Отлично! Теперь Вы можете пользоваться ботом. Раз в сутки бот будет искать партнера "
+                                  "согласно Вашей анкете для поиска, и если такой человек найдется, бот пришлет Вам "
+                                  "уведомление. Изменить данные для поиска или данные о себе Вы можете в любой "
+                                  "момент!")
     await state.finish()
 
 

@@ -6,10 +6,16 @@ from utils.db_api import botdb as db
 
 @dp.message_handler(text="Изменить статус для поиска 🖌️")
 async def change_user_search_status(message: types.Message):
-    await message.answer(
-        text="Выберите статус",
-        reply_markup=change_search_status_markup()
-    )
+    user = db.get_user(message.from_user.id)
+    if user is not None:
+        if message.from_user.username:
+            db.update_user(message.from_user.id, username=message.from_user.username)
+        await message.answer(
+            text="Выберите статус",
+            reply_markup=change_search_status_markup()
+        )
+    else:
+        await message.answer("Чтобы воспользоваться ботом, Вам необходимо заполнить анкеты")
 
 
 @dp.callback_query_handler(change_search_status_callback.filter())

@@ -1,4 +1,5 @@
 from pprint import pprint
+import re
 
 
 def prepare_answers(answers):
@@ -94,6 +95,13 @@ def create_message_by_search_questionnaire(questionnaire):
     return message
 
 
+def check_name(name: str):
+    response = {'name': None, 'message': None}
+    if re.findall(r"\d+", name):
+        response['message'] = "Имя не должно содержать цифры"
+    else:
+        response['name'] = name.capitalize()
+    return response
 
 
 

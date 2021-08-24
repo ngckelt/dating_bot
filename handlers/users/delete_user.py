@@ -6,10 +6,16 @@ from utils.db_api import botdb as db
 
 @dp.message_handler(text="Удалить мои данные ❌️")
 async def delete_user(message: types.Message):
-    await message.answer(
-        text="Внименае! Ваши данные будут удалены без воможности восстановления. Продолжить?",
-        reply_markup=confirm_markup('delete_user')
-    )
+    user = db.get_user(message.from_user.id)
+    if user is not None:
+        if message.from_user.username:
+            db.update_user(message.from_user.id, username=message.from_user.username)
+        await message.answer(
+            text="Внименае! Ваши данные будут удалены без воможности восстановления. Продолжить?",
+            reply_markup=confirm_markup('delete_user')
+        )
+    else:
+        await message.answer("Чтобы воспользоваться ботом, Вам необходимо заполнить анкеты")
 
 
 @dp.callback_query_handler(confirm_callback.filter(question="delete_user"))

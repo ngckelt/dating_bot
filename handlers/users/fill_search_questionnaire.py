@@ -56,9 +56,11 @@ async def cancel_fill(message: types.Message, state: FSMContext):
 
 # Начало
 @dp.message_handler(text="Заполнить анкету для поиска 📝")
-async def bot_start(message: types.Message, state: FSMContext):
+async def fill_search_questionnaire(message: types.Message, state: FSMContext):
     user = db.get_user(message.from_user.id)
     questionnaire = db.get_questionnaire_by_user(user)
+    if message.from_user.username:
+        db.update_user(message.from_user.id, username=message.from_user.username)
     if not questionnaire:
         questions = db.get_search_questions()
         current_question = 1
@@ -177,6 +179,7 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
     if int(education_city_index) == len(education_cities) - 1:
         # Просим ввести город самостоятельно
         await callback.message.answer(text="Укажите город")
+        await FillSearchQuestionnaire.get_education_city_by_message.set()
     else:
         education_city = education_cities[int(education_city_index)]
         await state.update_data(education_city=education_city, current_question=current_question)
@@ -192,8 +195,9 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
 
 
 # Город, где получали образование (сообщение)
-@dp.message_handler(state=FillSearchQuestionnaire.get_education_city)
+@dp.message_handler(state=FillSearchQuestionnaire.get_education_city_by_message)
 async def get_education_city_by_message(message: types.Message, state: FSMContext):
+    print("asdasdasdsa")
     city = message.text
     check = check_city(city)
     if check.get('equal'):
@@ -218,13 +222,14 @@ async def get_education_city_by_message(message: types.Message, state: FSMContex
             text=f"Возможно, Вы имель в виду {check.get('candidate')}?",
             reply_markup=yes_or_no_markup('city_candidate')
         )
+        await FillSearchQuestionnaire.get_education_city_candidate.set()
     else:
         await message.answer("Не удалось расознать Ваш город. Попробуйте еще раз")
 
 
 # Город где получали образование (кандидат)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='city_candidate'),
-                           state=FillSearchQuestionnaire.get_education_city)
+                           state=FillSearchQuestionnaire.get_education_city_candidate)
 async def get_education_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     choice = callback_data.get('choice')
@@ -247,6 +252,7 @@ async def get_education_city_candidate(callback: types.CallbackQuery, callback_d
         await FillSearchQuestionnaire.get_city.set()
     else:
         await callback.message.answer("Укажите город еще раз")
+        await FillSearchQuestionnaire.get_education_city_by_message.set()
 
 
 # Город проживания
@@ -261,6 +267,7 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
     current_question += 1
     if int(city_index) == len(cities) - 1:
         await callback.message.answer("Укажите город")
+        await FillSearchQuestionnaire.get_city_by_message.set()
     else:
         city = cities[int(city_index)]
         await state.update_data(city=city, current_question=current_question)
@@ -273,7 +280,7 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
 
 
 # Город проживания (сообщение)
-@dp.message_handler(state=FillSearchQuestionnaire.get_city)
+@dp.message_handler(state=FillSearchQuestionnaire.get_city_by_message)
 async def get_city_by_message(message: types.Message, state: FSMContext):
     city = message.text
     check = check_city(city)
@@ -296,12 +303,14 @@ async def get_city_by_message(message: types.Message, state: FSMContext):
             text=f"Возможно, Вы имель в виду {check.get('candidate')}?",
             reply_markup=yes_or_no_markup('city')
         )
+        await FillSearchQuestionnaire.get_city_candidate.set()
     else:
         await message.answer("Не удалось расознать Ваш город. Попробуйте еще раз")
 
 
 # Город проживания (кандидат)
-@dp.callback_query_handler(yes_or_no_callback.filter(question='city'), state=FillSearchQuestionnaire.get_city)
+@dp.callback_query_handler(yes_or_no_callback.filter(question='city'),
+                           state=FillSearchQuestionnaire.get_city_candidate)
 async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     choice = callback_data.get('choice')
@@ -321,6 +330,7 @@ async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict,
         await FillSearchQuestionnaire.has_car.set()
     else:
         await callback.message.answer("Укажите город еще раз")
+        await FillSearchQuestionnaire.get_city_by_message.set()
 
 
 # Должна ли быть машина
@@ -441,6 +451,9 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
     await state.finish()
 
 
-
+# Ловим сообщение когда просят нажать на кнопку
+@dp.message_handler(state=FillSearchQuestionnaire)
+async def catch_message(message: types.Message):
+    await message.answer("Пожалуйста, выберите один из предоставленных пунктов")
 
 

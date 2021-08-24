@@ -54,16 +54,22 @@ async def cancel_fill(message: types.Message, state: FSMContext):
 
 # Начало
 @dp.message_handler(text="Заполнить анкету о себе 📝")
-async def bot_start(message: types.Message, state: FSMContext):
-    questions = db.get_user_questions()
-    current_question = 1
-    await state.update_data(questions=questions, current_question=current_question)
-    await message.answer(
-        # Спрашиваем имя
-        text=f"Вопрос {current_question}/12\n{questions[NAME_ID].question}",
-        reply_markup=cancel_fill_markup()
-    )
-    await FillUserQuestionnaire.get_name.set()
+async def fill_user_questionnaire(message: types.Message, state: FSMContext):
+    user = db.get_user(message.from_user.id)
+    if user is None:
+        if message.from_user.username:
+            db.update_user(message.from_user.id, username=message.from_user.username)
+        questions = db.get_user_questions()
+        current_question = 1
+        await state.update_data(questions=questions, current_question=current_question)
+        await message.answer(
+            # Спрашиваем имя
+            text=f"Вопрос {current_question}/12\n{questions[NAME_ID].question}",
+            reply_markup=cancel_fill_markup()
+        )
+        await FillUserQuestionnaire.get_name.set()
+    else:
+        await message.answer("У Вас уже есть заполненная анкета")
 
 
 # Имя
@@ -72,19 +78,23 @@ async def get_name(message: types.Message, state: FSMContext):
     # Добавить пару проверок на входные данные
     state_data = await state.get_data()
     name = message.text
-    questions = state_data.get('questions')
-    current_question = state_data.get('current_question')
-    current_question += 1
-    await state.update_data(name=name, current_question=current_question)
-    # Спрашиваем пол
-    await message.answer(
-        text=f"Вопрос {current_question}/12\n{questions[GENDER_ID].question}",
-        reply_markup=universal_markup(
-            prepare_answers(questions[GENDER_ID].answer_options),
-            'gender_callback'
+    check = check_name(name)
+    if check['name']:
+        questions = state_data.get('questions')
+        current_question = state_data.get('current_question')
+        current_question += 1
+        await state.update_data(name=check['name'], current_question=current_question)
+        # Спрашиваем пол
+        await message.answer(
+            text=f"Вопрос {current_question}/12\n{questions[GENDER_ID].question}",
+            reply_markup=universal_markup(
+                prepare_answers(questions[GENDER_ID].answer_options),
+                'gender_callback'
+            )
         )
-    )
-    await FillUserQuestionnaire.get_gender.set()
+        await FillUserQuestionnaire.get_gender.set()
+    else:
+        await message.answer(check['message'])
 
 
 # Пол
@@ -110,26 +120,23 @@ async def get_gender(callback: types.CallbackQuery, callback_data: dict, state: 
 @dp.message_handler(state=FillUserQuestionnaire.get_age)
 async def get_age(message: types.Message, state: FSMContext):
     age = message.text
-    try:
-        age = int(age)
-        if 18 <= age <= 70:
-            state_data = await state.get_data()
-            questions = state_data.get('questions')
-            current_question = state_data.get('current_question')
-            current_question += 1
-            await state.update_data(age=age, current_question=current_question)
-            answers = prepare_answers(questions[NATIONALITY_ID].answer_options)
-            # Спрашиваем национальность
-            await state.update_data(nationalities=answers)
-            await message.answer(
-                text=f"Ворос {current_question}/12\n{questions[NATIONALITY_ID].question}",
-                reply_markup=nationality_markup(answers)
-            )
-            await FillUserQuestionnaire.get_nationality.set()
-        else:
-            await message.answer("Возраст должен находиться в диапазоне от 18 до 70")
-    except ValueError:
-        await message.answer("Воздаст должен быть указан числом")
+    check = is_correct_age(age)
+    if check.get('correct'):
+        state_data = await state.get_data()
+        questions = state_data.get('questions')
+        current_question = state_data.get('current_question')
+        current_question += 1
+        await state.update_data(age=age, current_question=current_question)
+        answers = prepare_answers(questions[NATIONALITY_ID].answer_options)
+        # Спрашиваем национальность
+        await state.update_data(nationalities=answers)
+        await message.answer(
+            text=f"Ворос {current_question}/12\n{questions[NATIONALITY_ID].question}",
+            reply_markup=nationality_markup(answers)
+        )
+        await FillUserQuestionnaire.get_nationality.set()
+    else:
+        await message.answer(check['message'])
 
 
 # Национальность (кнопка)
@@ -141,6 +148,7 @@ async def get_nationality(callback: types.CallbackQuery, callback_data: dict, st
     nationalities = state_data.get('nationalities')
     if int(nationality) == len(nationalities) - 1:
         await callback.message.answer(text="Укажите вашу национальность")
+        await FillUserQuestionnaire.get_nationality_by_message.set()
     else:
         nationality = nationalities[int(nationality)]
         await state.update_data(nationalities=None)
@@ -158,7 +166,7 @@ async def get_nationality(callback: types.CallbackQuery, callback_data: dict, st
 
 
 # Национальность (сообщение)
-@dp.message_handler(state=FillUserQuestionnaire.get_nationality)
+@dp.message_handler(state=FillUserQuestionnaire.get_nationality_by_message)
 async def get_nationality_by_message(message: types.Message, state: FSMContext):
     nationality = message.text
     state_data = await state.get_data()
@@ -212,6 +220,7 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
     education_cities = questions[EDUCATION_CITY_ID].answer_options.split('\n')
     if int(education_city_index) == len(education_cities) - 1:
         await callback.message.answer(text="Укажите город, в котором вы получали образование")
+        await FillUserQuestionnaire.get_education_city_by_message.set()
     else:
         current_question += 1
         education_city = education_cities[int(education_city_index)]
@@ -228,7 +237,7 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
 
 
 # Город, где получали образование (сообщение)
-@dp.message_handler(state=FillUserQuestionnaire.get_education_city)
+@dp.message_handler(state=FillUserQuestionnaire.get_education_city_by_message)
 async def get_education_city_message(message: types.Message, state: FSMContext):
     education_city = message.text
     check = check_city(education_city)
@@ -253,12 +262,14 @@ async def get_education_city_message(message: types.Message, state: FSMContext):
             text=f"Возможно, Вы имели в виду {check.get('candidate')}?",
             reply_markup=yes_or_no_markup('education_city')
         )
+        await FillUserQuestionnaire.get_education_city_candidate.set()
     else:
         await message.answer("Не удалось распознать ваш город. Попробуйте еще раз")
 
 
+# Город образования (кандидат)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='education_city'),
-                           state=FillUserQuestionnaire.get_education_city)
+                           state=FillUserQuestionnaire.get_education_city_candidate)
 async def get_education_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     choice = callback_data.get('choice')
@@ -279,6 +290,7 @@ async def get_education_city_candidate(callback: types.CallbackQuery, callback_d
         await FillUserQuestionnaire.get_city.set()
     else:
         await callback.message.answer("Укажите Ваш город еще раз")
+        await FillUserQuestionnaire.get_education_city_by_message.set()
 
 
 # Город проживания (кнопка)
@@ -292,6 +304,7 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
     cities = questions[CITY_ID].answer_options.split('\n')
     if int(city_index) == len(cities) - 1:
         await callback.message.answer(text="Укажите город, в котором вы сейчас проживаете")
+        await FillUserQuestionnaire.get_city_by_message.set()
     else:
         current_question += 1
         city = cities[int(city_index)]
@@ -305,7 +318,7 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
 
 
 # Город (сообщение)
-@dp.message_handler(state=FillUserQuestionnaire.get_city)
+@dp.message_handler(state=FillUserQuestionnaire.get_city_by_message)
 async def get_city_message(message: types.Message, state: FSMContext):
     city = message.text.capitalize()
     city_data = check_city(city)
@@ -328,12 +341,14 @@ async def get_city_message(message: types.Message, state: FSMContext):
             text=f"Возможно, вы имели в виду {city_data['candidate']}?",
             reply_markup=yes_or_no_markup('city_candidate')
         )
+        await FillUserQuestionnaire.get_city_candidate.set()
     else:
         await message.answer("Не удалось распознать Ваш город. Попробуйте еще раз")
 
 
 # Проверка города (сообщение)
-@dp.callback_query_handler(yes_or_no_callback.filter(question='city_candidate'), state=FillUserQuestionnaire.get_city)
+@dp.callback_query_handler(yes_or_no_callback.filter(question='city_candidate'),
+                           state=FillUserQuestionnaire.get_city_candidate)
 async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     choice = callback_data.get('choice')
@@ -350,9 +365,8 @@ async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict,
         )
         await FillUserQuestionnaire.has_car.set()
     else:
-        await callback.message.answer(
-            text="Укажите Ваш город еще раз"
-        )
+        await callback.message.answer(text="Укажите Ваш город еще раз")
+        await FillUserQuestionnaire.get_city_by_message.set()
 
 
 # Есть ли машина (кнопка)
@@ -448,7 +462,7 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
     db.add_user(
         telegram_id=callback.from_user.id,
         username=callback.from_user.username,
-        name=state_data.get('name').capitalize(),
+        name=state_data.get('name'),
         gender=state_data.get('gender'),
         age=state_data.get('age'),
         nationality=state_data.get('nationality'),
@@ -472,3 +486,10 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
         reply_markup=fill_search_questionnaire()
     )
     await state.finish()
+
+
+# Ловим сообщения, когда нужно нажать на кнопку
+@dp.message_handler(state=FillUserQuestionnaire)
+async def catch_message(message: types.Message):
+    await message.answer("Пожалуйста, выберите один из предоставленных пунктов")
+

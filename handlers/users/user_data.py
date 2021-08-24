@@ -15,21 +15,15 @@ from utils.cupid import cupid
 
 @dp.message_handler(text="Мои данные ✅")
 async def bot_start(message: types.Message):
-    # cupid.dump_users()
-    # cupid.dump_questionnaires()
-    # user = db.get_user(message.from_user.id)
-    # candidates = cupid.find_candidate(user)
-    # if len(candidates):
-    #     await message.answer(
-    #         text=f"Найден кандидат:\n"
-    #              f"Имя: {candidates[0].get('name')}\n"
-    #              f"Юзернейм: {candidates[0].get('username')}"
-    #     )
-    # print(candidates)
-    user = db.get_user(message.from_user.id)
-    db.update_known_users(message.from_user.id, '893534')
-    message_text = create_message_by_user_questionnaire(user)
-    await message.answer(message_text, parse_mode="HTML")
+    try:
+        user = db.get_user(message.from_user.id)
+        if message.from_user.username:
+            db.update_user(message.from_user.id, username=message.from_user.username)
+        db.update_known_users(message.from_user.id, '893534')
+        message_text = create_message_by_user_questionnaire(user)
+        await message.answer(message_text, parse_mode="HTML")
+    except AttributeError:
+        await message.answer("Чтобы воспользоваться ботом, Вам необходимо заполнить анкеты")
 
 
 

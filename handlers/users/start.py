@@ -10,7 +10,6 @@ from keyboards.default.questionnaire_markups import fill_user_questionnaire
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
-    print(message.from_user.values)
     user = db.get_user(message.from_user.id)
     if user is None:
         await message.answer(
@@ -21,7 +20,8 @@ async def bot_start(message: types.Message):
         )
         if message.from_user.username is None:
             await message.answer("Внимание ❗️\nУ вас не установлен username. Он необходим, чтобы другие пользователи "
-                                 "бота могли Вас найти. Установите username, и бот сам его увидет")
+                                 "бота могли Вас найти. Установите username, и бот сам его "
+                                 "увидит при очередном запросе")
     else:
         await message.answer(
             text="Вы уже использовали данную команду",

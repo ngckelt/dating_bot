@@ -15,19 +15,18 @@ from utils.db_api import botdb as db
 from .utils import *
 
 
-"""
-Имя  - 1
-Возраст - 2
-Национальность - 3
-Образование - 4
-Город образования - 5
-Город проживания - 6
-Есть ли автомобиль - 7
-Жилье - 8
-Занятие - 9
-Семейное положение - 10
-Дети - 11
-"""
+NAME_ID = '1'
+AGE_ID = '2'
+NATIONALITY_ID = '3'
+EDUCATION_ID = '4'
+EDUCATION_CITY_ID = '5'
+CITY_ID = '6'
+HAS_CAR_ID = '7'
+HOUSING_ID = '8'
+PROFESSION_ID = '9'
+MARITAL_STATUS_ID = '10'
+HAS_CHILDREN_ID = '11'
+GENDER_ID = '12'
 
 
 async def ask_to_continue_changing(message):
@@ -39,15 +38,20 @@ async def ask_to_continue_changing(message):
 
 
 @dp.message_handler(text="Изменить данные о себе ✏️")
-async def bot_start(message: types.Message):
-    user = db.get_user(message.from_user.id)
-    user_data_text = create_message_by_user_questionnaire(user)
-    await message.answer(user_data_text)
-    await message.answer(
-        text="Что Вы хотите изменить?",
-        reply_markup=change_user_data_markup()
-    )
-    await ChangeUserData.chose_item.set()
+async def update_user_data(message: types.Message):
+    try:
+        user = db.get_user(message.from_user.id)
+        if message.from_user.username:
+            db.update_user(message.from_user.id, username=message.from_user.username)
+        user_data_text = create_message_by_user_questionnaire(user)
+        await message.answer(user_data_text)
+        await message.answer(
+            text="Что Вы хотите изменить?",
+            reply_markup=change_user_data_markup()
+        )
+        await ChangeUserData.chose_item.set()
+    except AttributeError:
+        await message.answer("Чтобы воспользоваться ботом, Вам необходимо заполнить анкеты")
 
 
 @dp.callback_query_handler(yes_or_no_callback.filter(question='continue_changing'),
@@ -77,7 +81,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
         await callback.message.answer(text="Укажите новое имя")
         await ChangeUserData.change_name.set()
     if item == 'gender':
-        question = db.get_user_question_by_id("12")
+        question = db.get_user_question_by_id(GENDER_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -92,7 +96,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
         await callback.message.answer(text="Укажите новый возраст")
         await ChangeUserData.change_age.set()
     elif item == 'nationality':
-        question = db.get_user_question_by_id("3")
+        question = db.get_user_question_by_id(NATIONALITY_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -101,7 +105,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
         )
         await ChangeUserData.change_nationality.set()
     elif item == 'education':
-        question = db.get_user_question_by_id("4")
+        question = db.get_user_question_by_id(EDUCATION_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -114,7 +118,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
         await ChangeUserData.change_education.set()
     # Город образования
     elif item == 'education_city':
-        question = db.get_user_question_by_id("5")
+        question = db.get_user_question_by_id(EDUCATION_CITY_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -127,7 +131,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
         await ChangeUserData.change_education_city.set()
     # Город проживания
     elif item == 'city':
-        question = db.get_user_question_by_id("6")
+        question = db.get_user_question_by_id(CITY_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -139,7 +143,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
         )
         await ChangeUserData.change_city.set()
     elif item == 'profession':
-        question = db.get_user_question_by_id("9")
+        question = db.get_user_question_by_id(PROFESSION_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(
@@ -151,7 +155,7 @@ async def get_change_item(callback: types.CallbackQuery, callback_data: dict, st
         )
         await ChangeUserData.change_profession.set()
     elif item == 'marital_status':
-        question = db.get_user_question_by_id("10")
+        question = db.get_user_question_by_id(MARITAL_STATUS_ID)
         answers = prepare_answers(question.answer_options)
         await state.update_data(answers=answers)
         await callback.message.answer(

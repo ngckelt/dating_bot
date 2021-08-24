@@ -16,29 +16,23 @@ from keyboards.inline.user_questionare_markup import *
 
 
 @dp.message_handler(text="Изменить данные для поиска 📝")
-async def bot_start(message: types.Message):
-    user = db.get_user(message.from_user.id)
-    q = db.get_questionnaire_by_user(user)
-    message_text = create_message_by_search_questionnaire(q)
-    await message.answer(message_text)
-    await message.answer(
-        text="Что Вы хотите изменить?",
-        reply_markup=change_search_questionnaire_markup()
-    )
-    await ChangeSearchQuestionnaire.chose_item.set()
+async def change_search_data(message: types.Message):
+    try:
+        user = db.get_user(message.from_user.id)
+        q = db.get_questionnaire_by_user(user)
+        message_text = create_message_by_search_questionnaire(q)
+        if message.from_user.username:
+            db.update_user(message.from_user.id, username=message.from_user.username)
+        await message.answer(message_text)
+        await message.answer(
+            text="Что Вы хотите изменить?",
+            reply_markup=change_search_questionnaire_markup()
+        )
+        await ChangeSearchQuestionnaire.chose_item.set()
+    except AttributeError:
+        await message.answer("Чтобы воспользоваться ботом, Вам сперва необходимо заполнить анкеты")
 
-"""
-Возраст - 1
-Национальность - 2
-Образование - 3
-Город образования - 4
-Город проживания - 5
-Должен ли быть автомобиль - 6
-Жилье - 7
-Занятие - 8
-Семейное положение - 9
-Дети - 10
-"""
+
 MIN_AGE_ID = "1"
 MAX_AGE_ID = "2"
 NATIONALITY_ID = "3"
@@ -252,6 +246,7 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
     education_city_index = callback_data.get('education_city')
     if int(education_city_index) == len(educations) - 1:
         await callback.message.answer("Укажите город")
+        await ChangeSearchQuestionnaire.change_education_city_by_message.set()
     else:
         chosen_education_city = educations[int(education_city_index)]
         user = db.get_user(callback.from_user.id)
@@ -260,7 +255,7 @@ async def get_education_city(callback: types.CallbackQuery, callback_data: dict,
 
 
 # Изменить город образования (сообщения)
-@dp.message_handler(state=ChangeSearchQuestionnaire.change_education_city)
+@dp.message_handler(state=ChangeSearchQuestionnaire.change_education_city_by_message)
 async def change_education_city_by_message(message: types.Message, state: FSMContext):
     education_city = message.text
     check = check_city(education_city)
@@ -274,12 +269,14 @@ async def change_education_city_by_message(message: types.Message, state: FSMCon
             text=f"Возможно, Вы имели в виду {check.get('candidate')}?",
             reply_markup=yes_or_no_markup('change_education_city')
         )
+        await ChangeSearchQuestionnaire.change_education_city_candidate.set()
     else:
         await message.answer("Не удалось распознать город")
 
 
+# Город образования (кандидат)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='change_education_city'),
-                           state=ChangeSearchQuestionnaire.change_education_city)
+                           state=ChangeSearchQuestionnaire.change_education_city_candidate)
 async def get_education_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     choice = callback_data.get('choice')
@@ -291,6 +288,7 @@ async def get_education_city_candidate(callback: types.CallbackQuery, callback_d
         await ask_to_continue_changing(callback.message)
     else:
         await callback.message.answer("Укажите город еще раз")
+        await ChangeSearchQuestionnaire.change_education_city_by_message.set()
 
 
 # Город проживания (кнопка)
@@ -302,6 +300,7 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
     city_index = callback_data.get('city')
     if int(city_index) == len(cities) - 1:
         await callback.message.answer("Укажите город")
+        await ChangeSearchQuestionnaire.change_city_by_message.set()
     else:
         chosen_city = cities[int(city_index)]
         user = db.get_user(callback.from_user.id)
@@ -310,7 +309,7 @@ async def get_city(callback: types.CallbackQuery, callback_data: dict, state: FS
 
 
 # Город проживания (сообщение)
-@dp.message_handler(state=ChangeSearchQuestionnaire.change_city)
+@dp.message_handler(state=ChangeSearchQuestionnaire.change_city_by_message)
 async def change_city_by_message(message: types.Message, state: FSMContext):
     city = message.text
     check = check_city(city)
@@ -324,13 +323,14 @@ async def change_city_by_message(message: types.Message, state: FSMContext):
             text=f"Возможно, Вы имели в виду {check.get('candidate')}?",
             reply_markup=yes_or_no_markup('change_city')
         )
+        await ChangeSearchQuestionnaire.change_city_candidate.set()
     else:
         await message.answer("Не удалось распознать город")
 
 
 # Город проживания (кандидат)
 @dp.callback_query_handler(yes_or_no_callback.filter(question='change_city'),
-                           state=ChangeSearchQuestionnaire.change_city)
+                           state=ChangeSearchQuestionnaire.change_city_candidate)
 async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
     choice = callback_data.get('choice')
@@ -341,6 +341,7 @@ async def get_city_candidate(callback: types.CallbackQuery, callback_data: dict,
         await ask_to_continue_changing(callback.message)
     else:
         await callback.message.answer("Укажите город еще раз")
+        await ChangeSearchQuestionnaire.change_city_by_message.set()
 
 
 # Профессия
@@ -404,11 +405,9 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
     await ask_to_continue_changing(callback.message)
 
 
-@dp.message_handler(state=ChangeSearchQuestionnaire.chose_item)
+@dp.message_handler(state=ChangeSearchQuestionnaire)
 async def chose_item_error(message: types.Message, state: FSMContext):
-    await message.answer(
-        text="Пожалуйста, выберите один из вариантов ответа"
-    )
+    await message.answer(text="Пожалуйста, выберите один из предоставленных пунктов")
 
 
 

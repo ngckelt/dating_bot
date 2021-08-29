@@ -17,7 +17,7 @@ def main_markup():
                 KeyboardButton(text=f"Изменить статус для поиска 🖌️"),
             ],
         ],
-        resize_keyboard=True
+        resize_keyboard=True,
     )
 
     return markup

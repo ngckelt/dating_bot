@@ -54,6 +54,7 @@ def is_correct_age_range(age_range):
 def create_message_by_user_questionnaire(user):
     search_status = "Да"
     status_emoji = "🟢"
+    username = "Отсутствует"
     if not user.active_to_search:
         search_status = "Нет"
         status_emoji = "🔴"
@@ -61,9 +62,11 @@ def create_message_by_user_questionnaire(user):
         gender_emoji = "🙎‍♂️"
     else:
         gender_emoji = "🙍‍♀️"
+    if user.username:
+        username = user.username
     message = f"Ваши данные:\n\n" \
               f"{status_emoji} Активен для поиска: <b>{search_status}</b>\n\n" \
-              f"🆔 Юзернейм: <b>{user.username}</b>\n\n" \
+              f"🆔 Юзернейм: <b>{username}</b>\n\n" \
               f"🆗 Имя: <b>{user.name}</b>\n\n" \
               f"{gender_emoji} Пол: <b>{user.gender}</b>\n\n" \
               f"✅ Возраст: <b>{user.age}\n\n</b>" \
@@ -91,6 +94,48 @@ def create_message_by_search_questionnaire(questionnaire):
               f"💼 Чем должны заниматься: <b>{questionnaire.profession}</b>\n\n" \
               f"💍 Семейное положение: <b>{questionnaire.marital_status}</b>\n\n" \
               f"👶 Могут ли быть дети: <b>{questionnaire.has_children}</b>\n\n"
+    return message
+
+
+def create_candidate_data_message(candidate_data):
+    username = "Отсутствует"
+    if candidate_data.get('username'):
+        username = candidate_data.get('username')
+    message = f"🚨🚨🚨🚨🚨\n" \
+              f"Найден кандидат\n\n" \
+              f"🆗 Имя: <b>{candidate_data.get('name')}</b>\n\n" \
+              f"🆔 Юзернейм: <b>{username}</b>\n\n" \
+              f"✅ Возраст: <b>{candidate_data.get('age')}</b>\n\n" \
+              f"🏳️ Национальность: <b>{candidate_data.get('nationality')}</b>\n\n" \
+              f"🎓 Образование: <b>{candidate_data.get('education')}</b>\n\n" \
+              f"🏙 Город, где получал образование: <b>{candidate_data.get('education_city')}</b>\n\n" \
+              f"🌆 Город текущего проживания: <b>{candidate_data.get('city')}</b>\n\n" \
+              f"🚗 Есть ли автомобиль: <b>{candidate_data.get('has_car')}</b>\n\n" \
+              f"🏡 Есть ли собственное жилье: <b>{candidate_data.get('has_own_housing')}</b>\n\n" \
+              f"💼 Род деятельности: <b>{candidate_data.get('profession')}</b>\n\n" \
+              f"💍 Семейное положение: <b>{candidate_data.get('marital_status')}</b>\n\n" \
+              f"👶 Есть ли дети: <b>{candidate_data.get('has_children')}</b>\n\n"
+    return message
+
+
+def create_user_data_message(user):
+    username = "Отсутствует"
+    if user.username:
+        username = user.username
+    message = f"🚨🚨🚨🚨🚨\n" \
+              f"Вы были выбраны кандидатом для следующего пользователя:\n\n" \
+              f"🆔 Юзернейм: <b>{username}</b>\n\n" \
+              f"🆗 Имя: <b>{user.name}</b>\n\n" \
+              f"✅ Возраст: <b>{user.age}\n\n</b>" \
+              f"🏳️ Национальность: <b>{user.nationality}</b>\n\n" \
+              f"🎓 Образование: <b>{user.education}</b>\n\n" \
+              f"🏙 Город, где получал образование: <b>{user.education_city}</b>\n\n" \
+              f"🌆 Город текущего проживания: <b>{user.city}</b>\n\n" \
+              f"🚗 Есть автомобиль: <b>{user.has_car}</b>\n\n" \
+              f"🏡 Есть собственное жилье: <b>{user.has_own_housing}</b>\n\n" \
+              f"💼 Род деятельности: <b>{user.profession}</b>\n\n" \
+              f"💍 Семейное положение: <b>{user.marital_status}</b>\n\n" \
+              f"👶 Есть дети: <b>{user.has_children}</b>"
     return message
 
 

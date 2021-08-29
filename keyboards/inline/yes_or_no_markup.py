@@ -15,7 +15,7 @@ def yes_or_no_markup(question, does_not_matter=False):
     markup.add(
         InlineKeyboardButton(
             text="Нет",
-            callback_data=yes_or_no_callback.new(question, 'no')
+            callback_data=yes_or_no_callback.new(question, 'no'),
         )
     )
     if does_not_matter:

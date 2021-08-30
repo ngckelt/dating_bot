@@ -71,8 +71,9 @@ def calculate_match_percentage(candidate, questionnaire, user):
         return 0
     # print('education', end=" ")
     # Город образования
-    if candidate.get('education_city') != questionnaire.get('education_city'):
-        return 0
+    if questionnaire.get('education_city') != DOES_NOT_MATTER:
+        if candidate.get('education_city') != questionnaire.get('education_city'):
+            return 0
     # print('education city', end=" ")
     # Есть ли тачка
     if questionnaire.get('has_car') != DOES_NOT_MATTER:

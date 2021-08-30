@@ -65,12 +65,11 @@ async def search_candidates():
 # https://t.me/larwyn
 
 async def setup():
-    print("task setup ")
-    aioschedule.every().day.at("06:00").do(search_candidates)
+    aioschedule.every().day.at("14:00").do(search_candidates)
 
     # aioschedule.every().minute.do(search_candidates)
 
     while True:
         await aioschedule.run_pending()
-        await sleep(100)
+        await sleep(10)
 

@@ -47,69 +47,54 @@ def calculate_match_percentage(candidate, questionnaire, user):
     # Проверить что это не сам пользователь
     if candidate.get('telegram_id') == user.telegram_id:
         return 0
-    # print('not yourself', end=" ")
     # Активен ли для поиска
     if not candidate.get('active_to_search'):
         return 0
-    # print('active', end=" ")
     # Пол
     if candidate.get('gender') == user.gender:
         return 0
-    # print('gender', end=" ")
     # Проверить возраст
-    user_age = candidate.get('age')
+    candidate_age = candidate.get('age')
     desired_min_age, desired_max_age = questionnaire.get('age_range').split()
-    if int(user_age) not in range(int(desired_min_age), int(desired_max_age) + 1):
+    if int(candidate_age) not in range(int(desired_min_age), int(desired_max_age) + 1):
         return 0
-    # print('age', end=" ")
     # Город
     if candidate.get('city') != questionnaire.get('city'):
         return 0
-    # print('city', end=" ")
     # Образование
     if candidate.get('education') != questionnaire.get('education'):
         return 0
-    # print('education', end=" ")
     # Город образования
     if questionnaire.get('education_city') != DOES_NOT_MATTER:
         if candidate.get('education_city') != questionnaire.get('education_city'):
             return 0
-    # print('education city', end=" ")
     # Есть ли тачка
     if questionnaire.get('has_car') != DOES_NOT_MATTER:
         if candidate.get('has_car') != questionnaire.get('has_car'):
             return 0
-    # print('car', end=" ")
     # Могут ли быть дети
     if questionnaire.get('has_children') == 'Нет':
         if candidate.get('has_children') != questionnaire.get('has_children'):
             return 0
-    # print('children', end=" ")
     # Есть ли жилье
     if questionnaire.get('has_own_housing') != DOES_NOT_MATTER:
         if candidate.get('has_own_housing') != questionnaire.get('has_own_housing'):
             return 0
-    # print('housing', end=" ")
     # Семейное положение
     if candidate.get('marital_status') != questionnaire.get('marital_status'):
         return 0
-    # print('marital', end=" ")
     # Национальность
     if questionnaire.get('nationality') != DOES_NOT_MATTER:
         if candidate.get('nationality') != questionnaire.get('nationality'):
             return 0
-    # print('nationality', end=" ")
     # Профессия
     if questionnaire.get('profession') != DOES_NOT_MATTER:
         if candidate.get('profession') != questionnaire.get('profession'):
             return 0
-    # print('profession', end=" ")
-    print("******* Кандидат найден *******")
     return 1
 
 
 def get_candidates_by_questionnaire(questionnaire, user):
-    print(f"Ищем кандидата для: {user.username}\n")
     candidates = []
     users = get_candidates()
     for candidate_id, candidate_data in users.items():
@@ -133,8 +118,8 @@ def get_best_candidates(user):
 
 
 def find_candidates(user):
-    candidate = get_best_candidates(user)
-    return candidate
+    candidates = get_best_candidates(user)
+    return candidates
 
 
 def clear_dumps():

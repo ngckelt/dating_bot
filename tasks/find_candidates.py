@@ -12,7 +12,6 @@ import aioschedule
 
 
 async def search_candidates():
-    print("search_start")
     users = db.get_users()
     questionnaires = db.get_questionnaires()
     cupid.dump_users(users)
@@ -58,16 +57,10 @@ async def search_candidates():
                         print(e)
                     break
     cupid.clear_dumps()
-    print("search_end")
 
-
-# tg://user?id=801586978
-# https://t.me/larwyn
 
 async def setup():
     aioschedule.every().day.at("14:00").do(search_candidates)
-
-    # aioschedule.every().minute.do(search_candidates)
 
     while True:
         await aioschedule.run_pending()

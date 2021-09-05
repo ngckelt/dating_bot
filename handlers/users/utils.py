@@ -119,12 +119,8 @@ def create_candidate_data_message(candidate_data):
 
 
 def create_user_data_message(user):
-    username = "Отсутствует"
-    if user.username:
-        username = user.username
     message = f"🚨🚨🚨🚨🚨\n" \
               f"Вы были выбраны кандидатом для следующего пользователя:\n\n" \
-              f"🆔 Юзернейм: <b>{username}</b>\n\n" \
               f"🆗 Имя: <b>{user.name}</b>\n\n" \
               f"✅ Возраст: <b>{user.age}\n\n</b>" \
               f"🏳️ Национальность: <b>{user.nationality}</b>\n\n" \

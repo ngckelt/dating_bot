@@ -51,7 +51,7 @@ async def search_candidates():
                         await bot.send_message(
                             chat_id=candidate.get('telegram_id'),
                             text=user_data_message,
-                            reply_markup=to_candidate_markup
+                            reply_markup=None
                         )
                     except Exception as e:
                         print(e)

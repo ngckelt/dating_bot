@@ -91,5 +91,17 @@ class Questionnaires(TimeBasedModel):
         verbose_name_plural = "Анкеты для поиска"
 
 
+class WaitingQuestionnaires(TimeBasedModel):
+    text = models.TextField(verbose_name="Анкета")
+
+    def __str__(self):
+        return f"{self.text[:10]}..."
+
+    class Meta:
+        verbose_name = "Ожидающая анкета"
+        verbose_name_plural = "Ожидающие анкеты"
+
+
+
 
 

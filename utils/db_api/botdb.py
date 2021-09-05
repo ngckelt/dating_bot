@@ -76,6 +76,12 @@ def update_known_users(user, new_user_telegram_id):
     update_user(user.telegram_id, known_users=known_users)
 
 
+def create_waiting_questionnaire(text):
+    wq = WaitingQuestionnaires.objects.create(text=text)
+    return wq.id
 
+
+def get_waiting_questionnaire(id_):
+    return WaitingQuestionnaires.objects.filter(pk=id_).first()
 
 

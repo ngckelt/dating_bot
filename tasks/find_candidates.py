@@ -1,8 +1,6 @@
 from asyncio import sleep
-from datetime import datetime
-from pprint import pprint
 
-from keyboards.inline.link_to_user_markup import link_to_user_markup
+from keyboards.inline.link_to_user_markup import link_to_user_markup, show_user_data_markup
 from utils.db_api import botdb as db
 from utils.cupid import cupid
 from loader import bot
@@ -24,19 +22,15 @@ async def search_candidates():
             for candidate in candidates:
                 if candidate.get('telegram_id') not in known_users:
                     to_user_markup = None
-                    to_candidate_markup = None
                     if candidate.get('username'):
-                        # to_user_markup = link_to_user_markup(candidate.get('username'))
                         to_user_markup = link_to_user_markup(candidate.get('username'))
-                    if user.username:
-                        to_candidate_markup = link_to_user_markup(user.username)
-                        # to_candidate_markup = link_to_user_markup('larwyn')
                     candidate_data_message = create_candidate_data_message(candidate)
                     user_data_message = create_user_data_message(user)
                     db.update_known_users(
                         user,
                         candidate.get('telegram_id')
                     )
+                    user_data_id = db.create_waiting_questionnaire(user_data_message)
                     try:
                         # Сообщение пользователю, для которого нашелся кандидат
                         await bot.send_message(
@@ -50,8 +44,9 @@ async def search_candidates():
                         # Сообщение для пользователя, которого выбрали кандидатом
                         await bot.send_message(
                             chat_id=candidate.get('telegram_id'),
-                            text=user_data_message,
-                            reply_markup=None
+                            text="Вы были выбраны кандидатом. Чтобы увидеть данные пользователя, "
+                                 "воспользуйтесь прикрепленной кнопкой",
+                            reply_markup=show_user_data_markup(user_data_id)
                         )
                     except Exception as e:
                         print(e)

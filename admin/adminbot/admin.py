@@ -30,5 +30,5 @@ admin.site.register(models.SearchQuestions, SearchQuestionsAdmin)
 admin.site.register(models.Users, UsersAdmin)
 admin.site.register(models.Questionnaires, QuestionnairesAdmin)
 
-
+admin.site.register(models.WaitingQuestionnaires)
 

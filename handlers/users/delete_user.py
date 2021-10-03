@@ -11,7 +11,7 @@ async def delete_user(message: types.Message):
         if message.from_user.username:
             db.update_user(message.from_user.id, username=message.from_user.username)
         await message.answer(
-            text="Внименае! Ваши данные будут удалены без воможности восстановления. Продолжить?",
+            text="Внимание! Ваши данные будут удалены без воможности восстановления. Продолжить?",
             reply_markup=confirm_markup('delete_user')
         )
     else:

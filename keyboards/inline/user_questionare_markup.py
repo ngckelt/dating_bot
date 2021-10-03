@@ -194,7 +194,7 @@ def change_user_data_markup():
     )
     markup.add(
         InlineKeyboardButton(
-            text='Нициональность',
+            text='Национальность',
             callback_data=change_user_data_callback.new('nationality')
         )
     )

@@ -19,7 +19,7 @@ class UsersAdmin(admin.ModelAdmin):
 
 
 class QuestionnairesAdmin(admin.ModelAdmin):
-    search_fields = ['user__username', 'user__telegram_id']
+    search_fields = ['user__username', 'user__telegram_id', 'user__city']
 
     class Meta:
         model = models.Questionnaires

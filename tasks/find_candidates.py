@@ -59,5 +59,5 @@ async def setup():
 
     while True:
         await aioschedule.run_pending()
-        await sleep(10)
+        await sleep(1)
 

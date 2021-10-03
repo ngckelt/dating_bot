@@ -4,7 +4,7 @@ from pprint import pprint
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from keyboards.default.questionnaire_markups import fill_search_questionnaire, fill_user_questionnaire
+from keyboards.default.questionnaire_markups import fill_search_questionnaire, fill_user_questionnaire as fill_user_questionnaire_markup
 from loader import dp
 from states.fill_user_questionnaire import FillUserQuestionnaire
 from utils.db_api import botdb as db
@@ -47,7 +47,7 @@ async def cancel_fill(message: types.Message, state: FSMContext):
     await message.answer(
         text="Заполнение анкеты отменено. Вы можоте вернуться к заполнению анкеты в удобное для Вас время, "
              "еще раз нажав кнопку ниже",
-        reply_markup=fill_user_questionnaire()
+        reply_markup=fill_user_questionnaire_markup()
     )
     await state.finish()
 

@@ -13,7 +13,8 @@ async def bot_start(message: types.Message):
     user = db.get_user(message.from_user.id)
     if user is None:
         if message.from_user.username is None:
-            await message.answer("Внимание ❗️\nУ вас не установлен username. Он необходим, чтобы другие пользователи "
+            await message.answer("Внимание ❗️\nУ Вас не указано Имя пользователя в настройках Telegram. "
+                                 "Оно необходимо, чтобы другие пользователи "
                                  "бота могли Вас найти. Установите его, а после еще раз воспользуйтесь командой "
                                  "/start, чтобы зарегистрироваться в боте")
 

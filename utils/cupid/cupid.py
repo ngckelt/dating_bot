@@ -99,11 +99,15 @@ def get_candidates_by_questionnaire(questionnaire, user):
     users = get_candidates()
     for candidate_id, candidate_data in users.items():
         if calculate_match_percentage(candidate_data, questionnaire, user):
-            candidate_user = db.get_user(candidate_data.get('telegram_id'))
-            candidate_questionnaire = get_user_questionnaire(candidate_data.get('telegram_id'))
-            user_data = user.__dict__
-            if calculate_match_percentage(user_data, candidate_questionnaire, candidate_user):
-                candidates.append(candidate_data)
+            try:
+                candidate_user = db.get_user(candidate_data.get('telegram_id'))
+                candidate_questionnaire = get_user_questionnaire(candidate_data.get('telegram_id'))
+                user_data = user.__dict__
+                if candidate_questionnaire is not None:
+                    if calculate_match_percentage(user_data, candidate_questionnaire, candidate_user):
+                        candidates.append(candidate_data)
+            except:
+                ...
     return candidates
 
 

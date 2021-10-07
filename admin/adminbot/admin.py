@@ -12,7 +12,7 @@ class SearchQuestionsAdmin(admin.ModelAdmin):
 
 class UsersAdmin(admin.ModelAdmin):
     list_display = ['username']
-    search_fields = ['username', 'telegram_id']
+    search_fields = ['username', 'telegram_id', 'city']
 
     class Meta:
         model = models.Users

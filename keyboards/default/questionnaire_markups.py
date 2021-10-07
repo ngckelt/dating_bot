@@ -18,7 +18,7 @@ def cancel_fill_markup():
     return markup
 
 
-def fill_user_questionnaire():
+def fill_user_questionnaire_markup():
     markup = ReplyKeyboardMarkup(
         keyboard=[
             [
@@ -31,7 +31,7 @@ def fill_user_questionnaire():
     return markup
 
 
-def fill_search_questionnaire():
+def fill_search_questionnaire_markup():
     markup = ReplyKeyboardMarkup(
         keyboard=[
             [

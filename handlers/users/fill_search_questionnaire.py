@@ -4,7 +4,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from keyboards.default.main_markup import main_markup
-from keyboards.default.questionnaire_markups import cancel_fill_markup, fill_search_questionnaire
+from keyboards.default.questionnaire_markups import cancel_fill_markup, fill_search_questionnaire_markup
 from loader import dp
 from states.fill_search_questionnaire import FillSearchQuestionnaire
 from utils.db_api import botdb as db
@@ -49,7 +49,7 @@ async def cancel_fill(message: types.Message, state: FSMContext):
     await message.answer(
         text="Заполнение анкеты отменено. Вы можоте вернуться к заполнению анкеты в удобное для Вас время, "
              "еще раз нажав кнопку ниже",
-        reply_markup=fill_search_questionnaire()
+        reply_markup=fill_search_questionnaire_markup()
     )
     await state.finish()
 
@@ -93,6 +93,9 @@ async def get_min_age(message: types.Message, state: FSMContext):
         await message.answer(text=check['message'])
 
 
+# И ещё дополнить Вопрос 3/11 в опроснике
+# для поиска вариантом Иное (указать)
+
 # Максимальный возраст
 @dp.message_handler(state=FillSearchQuestionnaire.get_max_age)
 async def get_max_age(message: types.Message, state: FSMContext):
@@ -128,13 +131,35 @@ async def get_nationality(callback: types.CallbackQuery, callback_data: dict, st
     nationality = callback_data.get('nationality')
     nationalities = state_data.get('nationalities')
     nationality = nationalities[int(nationality)]
-    await state.update_data(nationalities=None)
-    questions = state_data.get('questions')
+    if nationality == "Иное (указать)\r":
+        await callback.message.answer("Укажите национальность")
+        await FillSearchQuestionnaire.get_nationality_by_message.set()
+    else:
+        await state.update_data(nationalities=None)
+        questions = state_data.get('questions')
+        current_question = state_data.get('current_question')
+        current_question += 1
+        await state.update_data(nationality=nationality, current_question=current_question)
+        answers = prepare_answers(questions[EDUCATION_ID].answer_options)
+        await callback.message.answer(
+            # Спрашиваем образование
+            text=f"Вопрос {current_question}/11\n{questions[EDUCATION_ID].question}",
+            reply_markup=universal_markup(answers, 'education_callback')
+        )
+        await FillSearchQuestionnaire.get_education.set()
+
+
+# Национальность (сообщение)
+@dp.message_handler(state=FillSearchQuestionnaire.get_nationality_by_message)
+async def get_nationality_by_message(message: types.Message, state: FSMContext):
+    state_data = await state.get_data()
     current_question = state_data.get('current_question')
     current_question += 1
+    questions = state_data.get('questions')
+    nationality = message.text.capitalize()
     await state.update_data(nationality=nationality, current_question=current_question)
     answers = prepare_answers(questions[EDUCATION_ID].answer_options)
-    await callback.message.answer(
+    await message.answer(
         # Спрашиваем образование
         text=f"Вопрос {current_question}/11\n{questions[EDUCATION_ID].question}",
         reply_markup=universal_markup(answers, 'education_callback')

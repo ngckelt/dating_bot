@@ -8,7 +8,6 @@ from keyboards.default.main_markup import main_markup
 from loader import dp
 
 from utils.db_api import botdb as db
-from keyboards.default.questionnaire_markups import fill_user_questionnaire
 from .utils import create_message_by_user_questionnaire
 from utils.cupid import cupid
 

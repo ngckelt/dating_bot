@@ -7,7 +7,7 @@ from keyboards.inline.yes_or_no_markup import yes_or_no_markup, yes_or_no_callba
 from loader import dp
 from utils.cities.cities import check_city
 from utils.db_api import botdb as db
-from keyboards.default.questionnaire_markups import fill_user_questionnaire
+from keyboards.default.questionnaire_markups import fill_user_questionnaire_markup
 from .utils import create_message_by_user_questionnaire, is_correct_age_range, create_message_by_search_questionnaire, \
     is_correct_age
 from states.change_search_questionnarie import ChangeSearchQuestionnaire
@@ -211,7 +211,7 @@ async def change_max_age(message: types.Message, state: FSMContext):
         await message.answer(check.get('message'))
 
 
-# Смена национальности
+# Смена национальности (кнопка)
 @dp.callback_query_handler(nationality_callback.filter(), state=ChangeSearchQuestionnaire.change_nationality)
 async def change_nationality(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()
@@ -219,12 +219,24 @@ async def change_nationality(callback: types.CallbackQuery, callback_data: dict,
     nationalities = state_data.get('answers')
     nationality_index = callback_data.get('nationality')
     chosen_nationality = nationalities[int(nationality_index)]
-    user = db.get_user(callback.from_user.id)
-    db.update_search_questionnaire(user, nationality=chosen_nationality)
-    await ask_to_continue_changing(callback.message)
+    if chosen_nationality == "Иное (указать)\r":
+        await callback.message.answer("Укажите национаьность")
+        await ChangeSearchQuestionnaire.change_nationality_by_message.set()
+    else:
+        user = db.get_user(callback.from_user.id)
+        db.update_search_questionnaire(user, nationality=chosen_nationality)
+        await ask_to_continue_changing(callback.message)
 
 
-# Образование (кнопка)
+@dp.message_handler(state=ChangeSearchQuestionnaire.change_nationality_by_message)
+async def change_nationality_by_message(message: types.Message, state: FSMContext):
+    nationality = message.text.capitalize()
+    user = db.get_user(message.from_user.id)
+    db.update_search_questionnaire(user, nationality=nationality)
+    await ask_to_continue_changing(message)
+
+
+    # Образование (кнопка)
 @dp.callback_query_handler(education_callback.filter(), state=ChangeSearchQuestionnaire.change_education)
 async def get_education(callback: types.CallbackQuery, callback_data: dict, state: FSMContext):
     await callback.answer()

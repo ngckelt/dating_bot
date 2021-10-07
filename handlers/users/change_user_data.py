@@ -9,7 +9,7 @@ from keyboards.inline.yes_or_no_markup import yes_or_no_markup, yes_or_no_callba
 from keyboards.default.main_markup import main_markup
 from utils.cities.cities import check_city
 from utils.db_api import botdb as db
-from keyboards.default.questionnaire_markups import fill_user_questionnaire
+from keyboards.default.questionnaire_markups import fill_user_questionnaire_markup
 from states.change_user_data import ChangeUserData
 from utils.db_api import botdb as db
 from .utils import *

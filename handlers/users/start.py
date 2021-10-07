@@ -5,7 +5,7 @@ from keyboards.default.main_markup import main_markup
 from loader import dp
 
 from utils.db_api import botdb as db
-from keyboards.default.questionnaire_markups import fill_user_questionnaire
+from keyboards.default.questionnaire_markups import fill_user_questionnaire_markup
 
 
 @dp.message_handler(CommandStart())
@@ -23,7 +23,7 @@ async def bot_start(message: types.Message):
                 text=f"Приветствуем Вас, {message.from_user.first_name}! 👋\n"
                      f"Чтобы воспользоваться ботом, Вам сперва необходимо заполнить "
                      f"анкету с данными о себе. Чтобы сделать это, воспользуйтесь кнопкой ниже 👇",
-                reply_markup=fill_user_questionnaire()
+                reply_markup=fill_user_questionnaire_markup()
             )
     else:
         await message.answer(

@@ -4,7 +4,7 @@ from pprint import pprint
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
-from keyboards.default.questionnaire_markups import fill_search_questionnaire, fill_user_questionnaire as fill_user_questionnaire_markup
+from keyboards.default.questionnaire_markups import fill_search_questionnaire_markup, fill_user_questionnaire_markup
 from loader import dp
 from states.fill_user_questionnaire import FillUserQuestionnaire
 from utils.db_api import botdb as db
@@ -483,7 +483,7 @@ async def has_children(callback: types.CallbackQuery, callback_data: dict, state
 
     await callback.message.answer(
         text="Теперь Вам необходимо заполнить анкету для поиска",
-        reply_markup=fill_search_questionnaire()
+        reply_markup=fill_search_questionnaire_markup()
     )
     await state.finish()
 

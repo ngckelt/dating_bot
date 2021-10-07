@@ -7,6 +7,7 @@ class ChangeSearchQuestionnaire(StatesGroup):
     change_min_age = State()
     change_max_age = State()
     change_nationality = State()
+    change_nationality_by_message = State()
     change_education = State()
     change_education_city = State()
     change_education_city_by_message = State()

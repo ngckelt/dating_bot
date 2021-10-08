@@ -89,7 +89,7 @@ def calculate_match_percentage(candidate, questionnaire, user):
             return 0
     # Профессия
     if questionnaire.get('profession') != DOES_NOT_MATTER:
-        if candidate.get('profession') != questionnaire.get('profession'):
+        if candidate.get('profession')[0].lower() != questionnaire.get('profession')[0].lower():
             return 0
     return 1
 
@@ -106,8 +106,9 @@ def get_candidates_by_questionnaire(questionnaire, user):
                 if candidate_questionnaire is not None:
                     if calculate_match_percentage(user_data, candidate_questionnaire, candidate_user):
                         candidates.append(candidate_data)
-            except:
-                ...
+            except Exception as e:
+                print(e)
+
     return candidates
 
 
